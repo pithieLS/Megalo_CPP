@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 
+#include "MEG_CellData.generated.h"
+
 UENUM()
 enum class EMEGDistrict
 {
@@ -16,8 +18,11 @@ enum class EMEGDistrict
 /**
  * 
  */
-class MEGALO_CPP_API FMEG_CellData
+USTRUCT()
+struct MEGALO_CPP_API FMEG_CellData
 {
+	GENERATED_BODY()
 public:
+	UPROPERTY(EditDefaultsOnly)
 	EMEGDistrict DistrictType;
 };
