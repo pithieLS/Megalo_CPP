@@ -15,6 +15,7 @@ class MEGALO_CPP_API UMEG_CellWidget : public UUserWidget
 {
 	GENERATED_BODY()
 public:
+	void UpdateCell(EMEGDistrict InDistrictType);
 
 	EMEGDistrict DistrictType;
 

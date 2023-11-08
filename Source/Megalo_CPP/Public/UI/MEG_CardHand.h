@@ -14,7 +14,17 @@ UCLASS()
 class MEGALO_CPP_API UMEG_CardHand : public UUserWidget
 {
 	GENERATED_BODY()
-	
+public:
+	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
+
+protected:
+	void UpdateHand();
+
+	void FillCardsInHandArray();
+
+	TArray<UMEG_CardWidget*> CardsInHand;
+
 	UPROPERTY(meta = (BindWidget))
 	UMEG_CardWidget* FirstCard;
 

@@ -15,6 +15,26 @@ class MEGALO_CPP_API AMEG_GM : public AGameModeBase
 {
 	GENERATED_BODY()
 
+public:
+	virtual void BeginPlay() override;
+
+//Card containers
+	TArray<int32> DrawnCardID;
+	TArray<int32> PlayedCardID;
+	TArray<int32> ScoringCardID;
+
 	UPROPERTY(EditDefaultsOnly)
 	TArray<FMEG_CardData> Cards;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UUserWidget> HUDWidgetClass;
+
+	DECLARE_DELEGATE(FOneCardHandUpdated)
+	FOneCardHandUpdated OnCardHandUpdatedDelegate;
+
+protected:
+	void DrawCard();
+
+	/* Return a card id from an available card. Return INDEX_NONE if no card is available */
+	int32 GetAvailableCardID() const;
 };

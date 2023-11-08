@@ -15,7 +15,6 @@ enum class EMEGCellPosition
 	BR
 };
 
-
 ENUM_RANGE_BY_FIRST_AND_LAST(EMEGCellPosition, EMEGCellPosition::TL, EMEGCellPosition::BR)
 
 /**
@@ -28,6 +27,9 @@ struct MEGALO_CPP_API FMEG_CardData
 public:
 	FMEG_CardData();
 	~FMEG_CardData();
+
+	UPROPERTY(EditDefaultsOnly)
+	int32 CardID;
 
 	UPROPERTY(EditDefaultsOnly)
 	TMap<EMEGCellPosition, FMEG_CellData> Cells;
