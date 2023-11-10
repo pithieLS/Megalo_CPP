@@ -5,6 +5,9 @@
 #include "MEG_Pawn.h"
 #include "Math/UnrealMathUtility.h"
 #include "Blueprint/UserWidget.h"
+#include "Kismet/GameplayStatics.h"
+#include "Data/MEG_DistrictDataRow.h"
+
 
 #define MAX_CARDS_CARDS_IN_HAND 3
 
@@ -38,6 +41,35 @@ int32 AMEG_GM::GetAvailableCardID() const
 
 	const int32 CardIndex = rand() % _AvailableCardID.Num();
 	return _AvailableCardID[CardIndex].CardID;
+}
+
+const FMEG_CardData* AMEG_GM::GetCardData(int32 _CardID) const
+{
+	const FMEG_CardData* CardData = Cards.FindByPredicate([_CardID](const FMEG_CardData& InCardData)
+		{
+			return InCardData.CardID == _CardID;
+		});
+
+	return CardData;
+}
+
+const FMEG_DistrictDataRow* AMEG_GM::GetDistrictDataRow(EMEGDistrict _DistrictType) const
+{
+	if (!ensure(DistrictDataTable))
+		return nullptr;
+
+	TArray<FName> RowNames = DistrictDataTable->GetRowNames();
+
+	for (const FName _RowName : RowNames)
+	{
+		FMEG_DistrictDataRow* DistrictDataRow = DistrictDataTable->FindRow<FMEG_DistrictDataRow>(_RowName, "");
+
+		if (DistrictDataRow && DistrictDataRow->DistrictType == _DistrictType)
+		{
+			return DistrictDataRow;
+		}
+	}
+	return nullptr;
 }
 
 void AMEG_GM::DrawCard()

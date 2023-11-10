@@ -8,6 +8,8 @@
 
 class UMEG_CellWidget;
 enum class EMEGCellPosition;
+class UButton;
+class UImage;
 
 /**
  * 
@@ -18,11 +20,21 @@ class MEGALO_CPP_API UMEG_CardWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	void UpdateCard(int32 CardID);
+	void UpdateCard(int32 _CardID);
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
+	int32 GetCardID();
+	bool GetIsSelected();
+	void SetSelected(bool _IsSelected);
 
 protected:
 	void FillCellWidgetMap();
+
+	UFUNCTION()
+	void OnButtonClicked();
+
+	int32 CardID;
+	bool IsCardSelected = false;
 
 	TMap<EMEGCellPosition, UMEG_CellWidget*> CellWidgets;
 
@@ -37,5 +49,11 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 	UMEG_CellWidget* CellBL;
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* CardButton;
+
+	UPROPERTY(meta = (BindWidget))
+	UImage* SelectedImage;
 
 };

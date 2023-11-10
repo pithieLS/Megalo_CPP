@@ -7,6 +7,7 @@
 #include "Data/MEG_CardData.h"
 #include "MEG_GM.generated.h"
 
+struct FMEG_DistrictDataRow;
 /**
  * 
  */
@@ -17,6 +18,8 @@ class MEGALO_CPP_API AMEG_GM : public AGameModeBase
 
 public:
 	virtual void BeginPlay() override;
+	const FMEG_CardData* GetCardData(int32 _CardID) const;
+	const FMEG_DistrictDataRow* GetDistrictDataRow(EMEGDistrict DistrictType) const;
 
 //Card containers
 	TArray<int32> DrawnCardID;
@@ -29,12 +32,17 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UUserWidget> HUDWidgetClass;
 
-	DECLARE_DELEGATE(FOneCardHandUpdated)
-	FOneCardHandUpdated OnCardHandUpdatedDelegate;
+	DECLARE_DELEGATE(FOnCardHandUpdated)
+	FOnCardHandUpdated OnCardHandUpdatedDelegate;
+
+	DECLARE_DELEGATE_OneParam(FOnCardSelected, int32 CardID)
+	FOnCardSelected OnCardSelectedDelegate;
 
 protected:
 	void DrawCard();
-
 	/* Return a card id from an available card. Return INDEX_NONE if no card is available */
 	int32 GetAvailableCardID() const;
+
+	UPROPERTY(EditDefaultsOnly)
+	class UDataTable* DistrictDataTable;
 };

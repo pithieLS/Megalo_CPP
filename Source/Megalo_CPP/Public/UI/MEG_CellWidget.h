@@ -22,4 +22,5 @@ public:
 protected:
 	UPROPERTY(meta = (BindWidget))
 	class UImage* DistrictImage;
+
 };

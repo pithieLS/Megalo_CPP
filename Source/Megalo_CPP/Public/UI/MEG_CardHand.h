@@ -20,8 +20,9 @@ public:
 
 protected:
 	void UpdateHand();
-
 	void FillCardsInHandArray();
+	UFUNCTION()
+	void OnCardSelected(int32 CardID);
 
 	TArray<UMEG_CardWidget*> CardsInHand;
 

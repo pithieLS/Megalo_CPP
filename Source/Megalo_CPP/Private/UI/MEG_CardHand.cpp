@@ -15,6 +15,7 @@ void UMEG_CardHand::NativeConstruct()
 		return;
 
 	GameMode->OnCardHandUpdatedDelegate.BindUObject(this, &UMEG_CardHand::UpdateHand);
+	GameMode->OnCardSelectedDelegate.BindUObject(this, &UMEG_CardHand::OnCardSelected);
 }
 
 void UMEG_CardHand::NativeDestruct()
@@ -33,13 +34,14 @@ void UMEG_CardHand::UpdateHand()
 		return;
 
 	const int32 NumCardsInHand = GameMode->DrawnCardID.Num();
-	for (int32 Index = 0; Index < NumCardsInHand; Index++)
+	for (int32 Index = 0; Index < CardsInHand.Num(); Index++)
 	{
-		if (Index > NumCardsInHand)
+		if (Index >= NumCardsInHand)
 		{
 			CardsInHand[Index]->SetVisibility(ESlateVisibility::Collapsed);
 			continue;
 		}
+		CardsInHand[Index]->SetVisibility(ESlateVisibility::Visible);
 		CardsInHand[Index]->UpdateCard(GameMode->DrawnCardID[Index]);
 	}
 }
@@ -49,4 +51,15 @@ void UMEG_CardHand::FillCardsInHandArray()
 	CardsInHand.Add(FirstCard);
 	CardsInHand.Add(SecondCard);
 	CardsInHand.Add(ThirdCard);
+}
+
+void UMEG_CardHand::OnCardSelected(int32 CardID)
+{
+	for (UMEG_CardWidget* _CardWidget : CardsInHand)
+	{
+		if (_CardWidget->GetCardID() == CardID)
+			_CardWidget->SetSelected(!_CardWidget->GetIsSelected());
+		else
+			_CardWidget->SetSelected(false);
+	}
 }
