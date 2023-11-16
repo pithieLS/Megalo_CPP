@@ -14,7 +14,6 @@ enum class EMEGCellPosition
 	BL,
 	BR
 };
-
 ENUM_RANGE_BY_FIRST_AND_LAST(EMEGCellPosition, EMEGCellPosition::TL, EMEGCellPosition::BR)
 
 /**

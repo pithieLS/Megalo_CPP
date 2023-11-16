@@ -23,6 +23,11 @@ protected:
 	void FillCardsInHandArray();
 	UFUNCTION()
 	void OnCardSelected(int32 CardID);
+	UFUNCTION()
+	void OnRequestPlaceCard(FVector2D InCoords);
+
+
+	UMEG_CardWidget* GetSelectedCard();
 
 	TArray<UMEG_CardWidget*> CardsInHand;
 

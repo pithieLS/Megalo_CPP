@@ -38,7 +38,7 @@ void UMEG_CardWidget::SetSelected(bool _IsSelected)
 {
 	IsCardSelected = _IsSelected;
 	if (IsCardSelected)
-		SelectedImage->SetVisibility(ESlateVisibility::Visible);
+		SelectedImage->SetVisibility(ESlateVisibility::HitTestInvisible);
 	else
 		SelectedImage->SetVisibility(ESlateVisibility::Collapsed);
 }

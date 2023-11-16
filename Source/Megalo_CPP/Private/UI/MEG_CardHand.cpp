@@ -16,6 +16,7 @@ void UMEG_CardHand::NativeConstruct()
 
 	GameMode->OnCardHandUpdatedDelegate.BindUObject(this, &UMEG_CardHand::UpdateHand);
 	GameMode->OnCardSelectedDelegate.BindUObject(this, &UMEG_CardHand::OnCardSelected);
+	GameMode->OnRequestPlaceCard.AddUObject(this, &UMEG_CardHand::OnRequestPlaceCard);
 }
 
 void UMEG_CardHand::NativeDestruct()
@@ -25,6 +26,8 @@ void UMEG_CardHand::NativeDestruct()
 		return;
 
 	GameMode->OnCardHandUpdatedDelegate.Unbind();
+	GameMode->OnCardSelectedDelegate.Unbind();
+	GameMode->OnRequestPlaceCard.RemoveAll(this);
 }
 
 void UMEG_CardHand::UpdateHand()
@@ -33,7 +36,7 @@ void UMEG_CardHand::UpdateHand()
 	if (!ensure(GameMode))
 		return;
 
-	const int32 NumCardsInHand = GameMode->DrawnCardID.Num();
+	const int32 NumCardsInHand = GameMode->DrawnCardsID.Num();
 	for (int32 Index = 0; Index < CardsInHand.Num(); Index++)
 	{
 		if (Index >= NumCardsInHand)
@@ -42,8 +45,20 @@ void UMEG_CardHand::UpdateHand()
 			continue;
 		}
 		CardsInHand[Index]->SetVisibility(ESlateVisibility::Visible);
-		CardsInHand[Index]->UpdateCard(GameMode->DrawnCardID[Index]);
+		CardsInHand[Index]->UpdateCard(GameMode->DrawnCardsID[Index]);
 	}
+}
+
+void UMEG_CardHand::OnRequestPlaceCard(FVector2D InCoords)
+{
+	// Don't do anything if no card is selected
+	if (GetSelectedCard()->GetCardID() == INDEX_NONE)
+		return;
+	AMEG_GM* GameMode = Cast<AMEG_GM>(UGameplayStatics::GetGameMode(this));
+	if (!ensure(GameMode != nullptr))
+		return;
+	GameMode->PlaceCardFromHand(GetSelectedCard()->GetCardID(), InCoords);
+	OnCardSelected(-1);
 }
 
 void UMEG_CardHand::FillCardsInHandArray()
@@ -62,4 +77,14 @@ void UMEG_CardHand::OnCardSelected(int32 CardID)
 		else
 			_CardWidget->SetSelected(false);
 	}
+}
+
+UMEG_CardWidget* UMEG_CardHand::GetSelectedCard()
+{
+	for (UMEG_CardWidget* _cardWidget : CardsInHand)
+	{
+		if (_cardWidget->GetIsSelected())
+			return _cardWidget;
+	}
+	return nullptr;
 }
