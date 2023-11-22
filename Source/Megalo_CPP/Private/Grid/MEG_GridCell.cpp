@@ -18,11 +18,12 @@ AMEG_GridCell::AMEG_GridCell()
 	CellWidget->SetupAttachment(RootComponent);
 }
 
-void AMEG_GridCell::UpdateCellDistrict(EMEGDistrict DistrictType)
+void AMEG_GridCell::UpdateCellWidget(EMEGDistrict DistrictType, TArray<EMEGRoad> _Roads)
 {
 	if (UMEG_CellWidget* CastCellWidget = Cast<UMEG_CellWidget>(CellWidget->GetUserWidgetObject()))
 	{
-		CastCellWidget->UpdateCell(DistrictType);
+		CastCellWidget->UpdateCell(DistrictType, _Roads);
+		Roads = _Roads;
 	}
 }
 
@@ -34,4 +35,14 @@ EMEGDistrict AMEG_GridCell::GetDistrictType() const
 	}
 	check(false);
 	return EMEGDistrict::Parc;
+}
+
+TArray<EMEGRoad> AMEG_GridCell::GetRoads() const
+{
+	if (const UMEG_CellWidget* CastCellWidget = Cast<UMEG_CellWidget>(CellWidget->GetUserWidgetObject()))
+	{
+		return CastCellWidget->Roads;
+	}
+	check(false);
+	return TArray<EMEGRoad>();
 }

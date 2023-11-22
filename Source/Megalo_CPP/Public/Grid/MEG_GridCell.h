@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Data/MEG_CellData.h"
 #include "MEG_GridCell.generated.h"
 
 class UWidgetComponent;
 struct FMEG_CardData;
-enum class EMEGDistrict;
 
 UCLASS()
 class MEGALO_CPP_API AMEG_GridCell : public AActor
@@ -18,10 +18,12 @@ class MEGALO_CPP_API AMEG_GridCell : public AActor
 public:	
 	// Sets default values for this actor's properties
 	AMEG_GridCell();
-	void UpdateCellDistrict(EMEGDistrict DistrictType);
+	void UpdateCellWidget(EMEGDistrict DistrictType, TArray<EMEGRoad> _Roads);
 	EMEGDistrict GetDistrictType() const;
+	TArray<EMEGRoad> GetRoads() const;
 
 	FVector2D CellCoords;
+	TArray<EMEGRoad> Roads;
 
 
 protected:

@@ -23,7 +23,7 @@ public:
 	void UpdateCard(int32 _CardID);
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
-	int32 GetCardID();
+	int32 GetCardID() const;
 	bool GetIsSelected();
 	void SetSelected(bool _IsSelected);
 

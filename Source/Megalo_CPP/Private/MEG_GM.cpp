@@ -8,9 +8,11 @@
 #include "Kismet/GameplayStatics.h"
 #include "Data/MEG_DistrictDataRow.h"
 #include "Grid/MEG_GridManager.h"
+#include "Score/MEG_ScoringStrategy.h"
 
 
 #define MAX_CARDS_CARDS_IN_HAND 3
+#define NUM_SCORING_CARDS 3
 
 void AMEG_GM::BeginPlay()
 {
@@ -22,6 +24,8 @@ void AMEG_GM::BeginPlay()
 
 	HUDWidget->AddToViewport();
 
+	SetScoringCards();
+
 	for (int32 Index = 0; Index < MAX_CARDS_CARDS_IN_HAND; Index++)
 	{
 		DrawCard();
@@ -31,7 +35,7 @@ void AMEG_GM::BeginPlay()
 	if (!ensure(GridManager))
 		return;
 
-	const int32 FirstPlacedCardID = GetAvailableCardID();
+	int32 FirstPlacedCardID = GetAvailableCardID();
 	GridManager->PlaceCard(FirstPlacedCardID, FVector2D(0, 0));
 	PlayedCardsID.Add(FirstPlacedCardID);
 	UpdateScore();
@@ -54,6 +58,27 @@ void AMEG_GM::RemoveCardFromHand(int32 CardId)
 	OnCardHandUpdatedDelegate.ExecuteIfBound();
 }
 
+void AMEG_GM::SetScoringCards()
+{
+	TArray<FMEG_CardData> _AvailableScoringCards = Cards.FilterByPredicate([this](const FMEG_CardData& InCardData)
+		{
+			return InCardData.ScoringClass != nullptr
+					&& !DrawnCardsID.Contains(InCardData.CardID)
+					&& !PlayedCardsID.Contains(InCardData.CardID)
+					&& !ScoringCardsID.Contains(InCardData.CardID);
+		});
+
+	for (int32 index = 0; index < NUM_SCORING_CARDS; index++)
+	{
+		if (!ensure(_AvailableScoringCards.Num() != 0))
+			break;
+
+		int32 CardIndex = rand() % _AvailableScoringCards.Num();
+		ScoringCardsID.Add(_AvailableScoringCards[CardIndex].CardID);
+		_AvailableScoringCards.RemoveAt(CardIndex);
+	}
+}
+
 void AMEG_GM::UpdateScore()
 {
 	Score = 0;
@@ -61,6 +86,39 @@ void AMEG_GM::UpdateScore()
 	{
 		Score += GridManager->GetBiggestDistrictClusterSize(District);
 	}
+ 	Score -= GridManager->GetRoadCount();
+
+	for (int32 index = 0; index < ScoringCardsID.Num(); index++)
+	{
+		const FMEG_CardData* CardData = GetCardData(ScoringCardsID[index]);
+		if (!ensure(CardData != nullptr && CardData->ScoringClass != nullptr))
+			continue;
+
+		const UMEG_ScoringStrategy* ScoringStrategyCDO = Cast<UMEG_ScoringStrategy>(CardData->ScoringClass->GetDefaultObject());
+		if (!ensure(ScoringStrategyCDO != nullptr))
+			continue;
+
+		Score += ScoringStrategyCDO->GetScore(GridManager->GetGridCells());
+	}
+}
+
+int32 AMEG_GM::GetPointGoal() const
+{
+	int32 PointGoal = 0;
+	for (const int32 _CardID : ScoringCardsID)
+	{
+		const FMEG_CardData* CardData = GetCardData(_CardID);
+		if (!ensure(CardData != nullptr && CardData->ScoringClass != nullptr))
+			continue;
+
+		const UMEG_ScoringStrategy* ScoringStrategyCDO = Cast<UMEG_ScoringStrategy>(CardData->ScoringClass->GetDefaultObject());
+		if(!ensure(ScoringStrategyCDO != nullptr))
+			continue;
+		
+		PointGoal += ScoringStrategyCDO->ScoringGoal;
+	}
+
+	return PointGoal;
 }
 
 int32 AMEG_GM::GetAvailableCardID() const

@@ -32,4 +32,7 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	TMap<EMEGCellPosition, FMEG_CellData> Cells;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UMEG_ScoringStrategy> ScoringClass;
 };

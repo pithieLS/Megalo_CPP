@@ -16,6 +16,14 @@ enum class EMEGDistrict
 };
 ENUM_RANGE_BY_FIRST_AND_LAST(EMEGDistrict, EMEGDistrict::Parc, EMEGDistrict::Dwellings)
 
+UENUM()
+enum class EMEGRoad : uint8
+{
+	Up = 0,
+	Right = 1,
+	Down = 2,
+	Left = 3
+};
 /**
  * 
  */
@@ -26,4 +34,7 @@ struct MEGALO_CPP_API FMEG_CellData
 public:
 	UPROPERTY(EditDefaultsOnly)
 	EMEGDistrict DistrictType;
+
+	UPROPERTY(EditDefaultsOnly)
+	TArray<EMEGRoad> Roads;
 };

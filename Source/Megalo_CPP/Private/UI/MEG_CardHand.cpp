@@ -49,15 +49,21 @@ void UMEG_CardHand::UpdateHand()
 	}
 }
 
-void UMEG_CardHand::OnRequestPlaceCard(FVector2D InCoords)
+void UMEG_CardHand::OnRequestPlaceCard(FVector2D _Coords)
 {
 	// Don't do anything if no card is selected
-	if (GetSelectedCard()->GetCardID() == INDEX_NONE)
+	const UMEG_CardWidget* SelectedCard = GetSelectedCard();
+	if (SelectedCard == nullptr)
 		return;
+
+	if (SelectedCard->GetCardID() == INDEX_NONE)
+		return;
+
 	AMEG_GM* GameMode = Cast<AMEG_GM>(UGameplayStatics::GetGameMode(this));
 	if (!ensure(GameMode != nullptr))
 		return;
-	GameMode->PlaceCardFromHand(GetSelectedCard()->GetCardID(), InCoords);
+
+	GameMode->PlaceCardFromHand(SelectedCard->GetCardID(), _Coords);
 	OnCardSelected(-1);
 }
 

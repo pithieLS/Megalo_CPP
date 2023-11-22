@@ -8,6 +8,7 @@
 
 enum class EMEGCellPosition;
 enum class EMEGDistrict;
+enum class EMEGRoad:uint8;
 class AMEG_GridCell;
 class AMEG_CardPlacer;
 
@@ -23,14 +24,19 @@ public:
 	void PlaceCard(int32 _CardID, FVector2D _CardCoords);
 	int32 GetBiggestDistrictClusterSize(const EMEGDistrict DistrictType) const;
 	int32 GetDistrictClusterSize(const AMEG_GridCell* GridCell, const EMEGDistrict DistrictType, TArray<FVector2D>& VisitedCoords) const;
+	int32 GetRoadCount() const;
+	TArray<class AMEG_GridCell*> GetGridCells() const;
+	AMEG_GridCell* GetCellFromCoords(FVector2D _OffsetCoords) const;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	const FVector2D GetCellPositionOffset(EMEGCellPosition _CellPosition) const;
-	AMEG_GridCell* GetCellFromCoords(FVector2D _OffsetCoords) const;
 	void UpdateCardPlacers(FVector2D _Coords);
+	void VisitSingleRoad(const AMEG_GridCell* InGridCell, TArray<FVector2D>& VisitedCoords) const;
+	const FVector2D GetRoadNeighborOffset(const EMEGRoad& Road) const;
+	const EMEGRoad GetOppositeRoad(const EMEGRoad InitialDirection) const;
 
 	TArray<class AMEG_GridCell*> GridCells;
 	TArray<AMEG_CardPlacer*> CardPlacers;

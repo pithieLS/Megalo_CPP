@@ -49,7 +49,7 @@ void AMEG_GridManager::PlaceCard(int32 _CardID, FVector2D _CardCoords)
 		}
 		if (!ensure(CurrentGridCell != nullptr))
 			continue;
-		CurrentGridCell->UpdateCellDistrict(_CellData.Value.DistrictType);
+		CurrentGridCell->UpdateCellWidget(_CellData.Value.DistrictType, _CellData.Value.Roads);
 	}
 	UpdateCardPlacers(_CardCoords);
 }
@@ -128,7 +128,6 @@ int32 AMEG_GridManager::GetBiggestDistrictClusterSize(const EMEGDistrict _Distri
 {
 	TArray<FVector2D> VisitedCoords;
 	int32 BiggestClusterSize = 0;
-
 	for (const AMEG_GridCell* GridCell : GridCells)
 	{
 		if (!ensure(GridCell != nullptr))
@@ -151,15 +150,11 @@ int32 AMEG_GridManager::GetDistrictClusterSize(const AMEG_GridCell* _GridCell, c
 {
 	if (_GridCell->GetDistrictType() != District)
 		return 0;
-
 	// If cell already visited, return
 	if (VisitedCoords.Contains(_GridCell->CellCoords))
 		return 0;
-
 	VisitedCoords.Add(_GridCell->CellCoords);
-
 	int32 Size = 1;
-
 	// Call the function recursively on all 4 neighbors (if they exist)
 	for (const FVector2D NeighBorCoords : NeighborsOffset)
 	{
@@ -172,7 +167,6 @@ int32 AMEG_GridManager::GetDistrictClusterSize(const AMEG_GridCell* _GridCell, c
 	return Size;
 }
 
-
 AMEG_GridCell* AMEG_GridManager::GetCellFromCoords(FVector2D _OffsetCoords) const
 {
 	AMEG_GridCell*const* _GridCell = GridCells.FindByPredicate([_OffsetCoords](const AMEG_GridCell* _GridCell)
@@ -184,3 +178,82 @@ AMEG_GridCell* AMEG_GridManager::GetCellFromCoords(FVector2D _OffsetCoords) cons
 	return *_GridCell;
 }
 
+int32 AMEG_GridManager::GetRoadCount() const
+{
+	TArray<FVector2D> VisitedCoords;
+	int32 NumRoads = 0;
+
+	for (const AMEG_GridCell* _GridCell : GridCells)
+	{
+		if (!ensure(_GridCell != nullptr))
+			continue;
+
+		if (_GridCell->GetRoads().Num() == 0)
+			continue; // No roads
+
+		// Skip it if already visited
+		if (VisitedCoords.Contains(_GridCell->CellCoords))
+			continue;
+
+		NumRoads++;
+
+		// No need to know the length of the road, we just want to mark this entire road as visited
+		VisitSingleRoad(_GridCell, VisitedCoords);
+	}
+	return NumRoads;
+}
+
+TArray<class AMEG_GridCell*> AMEG_GridManager::GetGridCells() const
+{
+	return GridCells;
+}
+
+void AMEG_GridManager::VisitSingleRoad(const AMEG_GridCell* _GridCell, TArray<FVector2D>& VisitedCoords) const
+{
+	if (_GridCell->GetRoads().Num() == 0)
+		return; // No roads
+
+	if (VisitedCoords.Contains(_GridCell->CellCoords))
+		return;
+
+	VisitedCoords.Add(_GridCell->CellCoords);
+
+	// Check every road direction to see if it's connected on a neighbor cell
+	for (const EMEGRoad Road : _GridCell->GetRoads())
+	{
+		const FVector2D Offset = GetRoadNeighborOffset(Road);
+		const AMEG_GridCell* NeighBorCell = GetCellFromCoords(_GridCell->CellCoords + Offset);
+
+		if (NeighBorCell == nullptr) // There are no cell at this coord
+			continue;
+
+		if (!NeighBorCell->GetRoads().Contains(GetOppositeRoad(Road)))
+			continue;
+
+		VisitSingleRoad(NeighBorCell, VisitedCoords);
+	}
+}
+
+const FVector2D AMEG_GridManager::GetRoadNeighborOffset(const EMEGRoad& Road) const
+{
+	switch (Road)
+	{
+	case EMEGRoad::Up:
+		return FVector2D(0, -1);
+	case EMEGRoad::Down:
+		return FVector2D(0, 1);
+	case EMEGRoad::Left:
+		return FVector2D(-1, 0);
+	case EMEGRoad::Right:
+		return FVector2D(0, 1);
+	default:
+		return FVector2D(0, 0);
+	}
+}
+const EMEGRoad AMEG_GridManager::GetOppositeRoad(const EMEGRoad InitialDirection) const
+{
+	int32 IntDirection = (int32)InitialDirection;
+	IntDirection = (IntDirection + 2) % 4;
+	const EMEGRoad OppositeDirection = (EMEGRoad)IntDirection;
+	return OppositeDirection;
+}

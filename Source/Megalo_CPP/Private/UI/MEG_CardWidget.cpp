@@ -24,7 +24,7 @@ void UMEG_CardWidget::NativeDestruct()
 	CardButton->OnClicked.RemoveAll(this);
 }
 
-int32 UMEG_CardWidget::GetCardID()
+int32 UMEG_CardWidget::GetCardID() const
 {
 	return CardID;
 }
@@ -62,8 +62,9 @@ void UMEG_CardWidget::UpdateCard(int32 _CardID)
 			return;
 
 		const EMEGDistrict CellDistrict = CardData->Cells[cellPair.Key].DistrictType;
+		const TArray<EMEGRoad>& _Roads = CardData->Cells[cellPair.Key].Roads;
 
-		cellPair.Value->UpdateCell(CellDistrict);
+		cellPair.Value->UpdateCell(CellDistrict, _Roads);
 	}
 }
 

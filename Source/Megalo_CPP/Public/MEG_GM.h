@@ -23,6 +23,9 @@ public:
 	const FMEG_DistrictDataRow* GetDistrictDataRow(EMEGDistrict DistrictType) const;
 	void PlaceCardFromHand(int32 InCardId, FVector2D InCoords);
 
+	UFUNCTION(BlueprintCallable)
+	int32 GetPointGoal() const;
+
 
 //Card containers
 	TArray<int32> DrawnCardsID;
@@ -50,6 +53,7 @@ protected:
 	/* Return a card id from an available card. Return INDEX_NONE if no card is available */
 	int32 GetAvailableCardID() const;
 	void RemoveCardFromHand(int32 CardId);
+	void SetScoringCards();
 
 	class AMEG_GridManager* GridManager;
 
