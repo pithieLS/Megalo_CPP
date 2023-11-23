@@ -21,7 +21,9 @@ public:
 	UFUNCTION()
 	void OnMeshClicked(UPrimitiveComponent* Component, FKey ButtonPressed);
 
+	UPROPERTY(BlueprintReadWrite)
 	FVector2D Coords;
+
 protected :
 	UPROPERTY(EditAnywhere)
 	class USceneComponent* SceneComponent;

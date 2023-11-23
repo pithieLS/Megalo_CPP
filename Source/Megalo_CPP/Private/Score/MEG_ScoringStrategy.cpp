@@ -2,9 +2,12 @@
 
 
 #include "Score/MEG_ScoringStrategy.h"
+#include "Kismet/GameplayStatics.h"
 #include "Grid/MEG_GridCell.h"
+#include "Grid/MEG_GridManager.h"
+#include "MEG_GM.h"
 
-int32 UMEG_ScoreGoGreen::GetScore(const TArray<AMEG_GridCell*>& GridCells) const
+int32 UMEG_ScoreGoGreen::GetScore(const TArray<AMEG_GridCell*>& GridCells, AMEG_GM* GameMode) const
 {
 	int32 Score = 0;
 	for (const AMEG_GridCell* _GridCell : GridCells)
@@ -25,7 +28,7 @@ int32 UMEG_ScoreGoGreen::GetScore(const TArray<AMEG_GridCell*>& GridCells) const
 	return 0;
 }
 
-int32 UMEG_ScoreBloomBloom::GetScore(const TArray<AMEG_GridCell*>& GridCells) const
+int32 UMEG_ScoreBloomBloom::GetScore(const TArray<AMEG_GridCell*>& GridCells, AMEG_GM* GameMode) const
 {
 	int32 Score = 0;
 	TArray<float> VisitedYCoords;
@@ -89,4 +92,45 @@ int32 UMEG_ScoreBloomBloom::GetScore(const TArray<AMEG_GridCell*>& GridCells) co
 
 	//return Score;
 	return 0;
+}
+
+int32 UMEG_ScoreStackAndScrapers::GetScore(const TArray<AMEG_GridCell*>& GridCells, AMEG_GM* GameMode) const
+{
+	int32 Score = 0;
+
+	const AMEG_GridManager* GridManager = GameMode->GetGridManager();
+
+	// Get all the industry Cells
+	const TArray<AMEG_GridCell*> IndustryCells = GridCells.FilterByPredicate([this, GridCells](const AMEG_GridCell* _GridCell)
+		{
+			return _GridCell->GetDistrictType() == EMEGDistrict::Industry;
+		});
+
+	const TArray<FVector2D> NeighbourOffsets = {FVector2D(0, -1), FVector2D(1, 0),
+										  FVector2D(0, 1), FVector2D(-1, 0)};
+	for (const AMEG_GridCell* _GridCell : IndustryCells)
+	{
+		bool isOnlyIndusCom = true;
+
+		// For each neighbor cells, check if any isn't industry or commercial. 
+		// If not industry or commercial check for next industry cell, else, add 2 to score.
+		const FVector2D CellCoords = _GridCell->CellCoords;
+		for (FVector2D Offset : NeighbourOffsets)
+		{
+			const AMEG_GridCell* NeighbourCell = GridManager->GetCellFromCoords(CellCoords + Offset);
+			if (NeighbourCell == nullptr)
+				continue;
+
+			const EMEGDistrict NeighbourDistrictType = NeighbourCell->GetDistrictType();
+			if (NeighbourDistrictType != EMEGDistrict::Industry && NeighbourDistrictType != EMEGDistrict::Commercial)
+			{
+				isOnlyIndusCom = false;
+				break;
+			}
+		}
+		if (isOnlyIndusCom)
+				Score += 2;
+	}
+
+	return Score;
 }

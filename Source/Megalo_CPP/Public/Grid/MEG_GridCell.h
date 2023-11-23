@@ -8,6 +8,7 @@
 #include "MEG_GridCell.generated.h"
 
 class UWidgetComponent;
+class UMEG_CellWidget;
 struct FMEG_CardData;
 
 UCLASS()
@@ -21,6 +22,8 @@ public:
 	void UpdateCellWidget(EMEGDistrict DistrictType, TArray<EMEGRoad> _Roads);
 	EMEGDistrict GetDistrictType() const;
 	TArray<EMEGRoad> GetRoads() const;
+	void SetCellVisibilityAndOpacity(bool bVisibility, float _Opacity);
+	const UMEG_CellWidget* GetCellWidget() const;
 
 	FVector2D CellCoords;
 	TArray<EMEGRoad> Roads;

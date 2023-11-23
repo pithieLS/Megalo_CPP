@@ -3,6 +3,7 @@
 
 #include "Grid/MEG_GridCell.h"
 #include "Components/WidgetComponent.h"
+#include "Components/Image.h"
 #include "Data/MEG_CardData.h"
 #include "UI/MEG_CellWidget.h"
 #include "UI/MEG_CellWidget.h"
@@ -45,4 +46,22 @@ TArray<EMEGRoad> AMEG_GridCell::GetRoads() const
 	}
 	check(false);
 	return TArray<EMEGRoad>();
+}
+
+void AMEG_GridCell::SetCellVisibilityAndOpacity(bool bVisibility, float _Opacity)
+{
+	const UMEG_CellWidget* CastCellWidget = Cast<UMEG_CellWidget>(CellWidget->GetUserWidgetObject());
+	if (!ensure(CastCellWidget != nullptr))
+		return;
+	CellWidget->SetVisibility(bVisibility);
+	CastCellWidget->GetDistrictImageComponent()->SetOpacity(_Opacity);
+}
+
+const UMEG_CellWidget* AMEG_GridCell::GetCellWidget() const
+{
+	const UMEG_CellWidget* CastCellWidget = Cast<UMEG_CellWidget>(CellWidget->GetUserWidgetObject());
+	if (!ensure(CastCellWidget != nullptr))
+		return nullptr;
+
+	return CastCellWidget;
 }

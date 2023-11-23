@@ -9,6 +9,7 @@
 
 class UImage;
 class USizeBox;
+class UOverlay;
 /**
  * 
  */
@@ -18,6 +19,7 @@ class MEGALO_CPP_API UMEG_CellWidget : public UUserWidget
 	GENERATED_BODY()
 public:
 	void UpdateCell(EMEGDistrict _DistrictType, TArray<EMEGRoad> _Roads);
+	UImage* GetDistrictImageComponent() const;
 
 	UPROPERTY(EditDefaultsOnly)
 	TArray<EMEGRoad> Roads;

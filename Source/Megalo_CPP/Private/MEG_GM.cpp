@@ -9,6 +9,8 @@
 #include "Data/MEG_DistrictDataRow.h"
 #include "Grid/MEG_GridManager.h"
 #include "Score/MEG_ScoringStrategy.h"
+#include "Grid/MEG_GridCell.h"
+#include "Grid/MEG_CardPlacer.h"
 
 
 #define MAX_CARDS_CARDS_IN_HAND 3
@@ -18,7 +20,7 @@ void AMEG_GM::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UUserWidget* HUDWidget = CreateWidget<UUserWidget>(GetWorld(), HUDWidgetClass);
+	HUDWidget = CreateWidget<UUserWidget>(GetWorld(), HUDWidgetClass);
 	if (!ensure(HUDWidget != nullptr))
 		return;
 
@@ -39,6 +41,8 @@ void AMEG_GM::BeginPlay()
 	GridManager->PlaceCard(FirstPlacedCardID, FVector2D(0, 0));
 	PlayedCardsID.Add(FirstPlacedCardID);
 	UpdateScore();
+
+	UpdateBoardLimits();
 }
 
 void AMEG_GM::PlaceCardFromHand(int32 InCardId, FVector2D InCoords)
@@ -50,6 +54,11 @@ void AMEG_GM::PlaceCardFromHand(int32 InCardId, FVector2D InCoords)
 	RemoveCardFromHand(InCardId);
 	DrawCard();
 	UpdateScore();
+}
+
+AMEG_GridManager* AMEG_GM::GetGridManager()
+{
+	return GridManager;
 }
 
 void AMEG_GM::RemoveCardFromHand(int32 CardId)
@@ -79,9 +88,38 @@ void AMEG_GM::SetScoringCards()
 	}
 }
 
+void AMEG_GM::UpdateBoardLimits()
+{
+
+	TArray<AActor*> FoundPlacer;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AMEG_CardPlacer::StaticClass(), FoundPlacer);
+
+	for (const AActor* _Placer : FoundPlacer)
+	{
+		const AMEG_CardPlacer* _CastedPlacer = Cast<AMEG_CardPlacer>(_Placer);
+		FVector _PlacerCoords = _CastedPlacer->GetActorLocation();
+
+		// Right = x+
+		// Left = x-
+		// Up = y-
+		// Down = y+
+
+		if (_PlacerCoords.X > BoardLimits.MaxR)
+			BoardLimits.MaxR = _PlacerCoords.X;
+		else if (_PlacerCoords.X < BoardLimits.MaxL)
+			BoardLimits.MaxL = _PlacerCoords.X;
+		else if (_PlacerCoords.Y < BoardLimits.MaxU)
+			BoardLimits.MaxU = _PlacerCoords.Y;
+		else if (_PlacerCoords.Y > BoardLimits.MaxD)
+			BoardLimits.MaxD = _PlacerCoords.Y;
+	}
+}
+
 void AMEG_GM::UpdateScore()
 {
 	Score = 0;
+	AMEG_GM* GameMode = Cast<AMEG_GM>(UGameplayStatics::GetGameMode(this));
+
 	for (EMEGDistrict District : TEnumRange<EMEGDistrict>())
 	{
 		Score += GridManager->GetBiggestDistrictClusterSize(District);
@@ -98,8 +136,9 @@ void AMEG_GM::UpdateScore()
 		if (!ensure(ScoringStrategyCDO != nullptr))
 			continue;
 
-		Score += ScoringStrategyCDO->GetScore(GridManager->GetGridCells());
+		Score += ScoringStrategyCDO->GetScore(GridManager->GetGridCells(), GameMode);
 	}
+	UpdateBoardLimits();
 }
 
 int32 AMEG_GM::GetPointGoal() const

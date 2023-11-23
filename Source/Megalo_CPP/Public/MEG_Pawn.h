@@ -9,6 +9,7 @@
 class USceneComponent;
 class UCameraComponent;
 class UFloatingPawnMovement;
+class AMEG_GM;
 
 UCLASS()
 class MEGALO_CPP_API AMEG_Pawn : public APawn
@@ -24,8 +25,18 @@ protected:
 	virtual void BeginPlay() override;
 	void MoveForward(float MovementDelta);
 	void MoveRight(float MovementDelta);
-	void LookUp(float X_Axis);
+	void MoveUp(float MovementDelta);
 
+	
+
+	AMEG_GM* GameMode;
+
+	UPROPERTY(EditAnywhere, Category = "ZoomCamera")
+	float MaxHeight = 1500;
+
+	UPROPERTY(EditAnywhere, Category = "ZoomCamera")
+	float MinHeight = 150;
+	
 	UPROPERTY(EditAnywhere)
 	USceneComponent* SceneComponent;
 

@@ -22,15 +22,25 @@ public:
 	const FMEG_CardData* GetCardData(int32 _CardID) const;
 	const FMEG_DistrictDataRow* GetDistrictDataRow(EMEGDistrict DistrictType) const;
 	void PlaceCardFromHand(int32 InCardId, FVector2D InCoords);
+	AMEG_GridManager* GetGridManager();
 
 	UFUNCTION(BlueprintCallable)
 	int32 GetPointGoal() const;
+
+	struct FHeightWidthLimits
+	{
+		float MaxU = 0;
+		float MaxR = 0;
+		float MaxD = 0;
+		float MaxL = 0;
+	} BoardLimits;
 
 
 //Card containers
 	TArray<int32> DrawnCardsID;
 	TArray<int32> PlayedCardsID;
 	TArray<int32> ScoringCardsID;
+	UUserWidget* HUDWidget;
 
 	UPROPERTY(EditDefaultsOnly)
 	TArray<FMEG_CardData> Cards;
@@ -54,6 +64,7 @@ protected:
 	int32 GetAvailableCardID() const;
 	void RemoveCardFromHand(int32 CardId);
 	void SetScoringCards();
+	void UpdateBoardLimits();
 
 	class AMEG_GridManager* GridManager;
 

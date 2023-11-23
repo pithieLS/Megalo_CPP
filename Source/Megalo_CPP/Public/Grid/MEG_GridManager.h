@@ -21,12 +21,19 @@ public:
 	// Sets default values for this actor's properties
 	AMEG_GridManager();
 
+	UFUNCTION(BlueprintCallable)
+	void MakeCardPreview(FVector2D _CardCoords);
+
+	UFUNCTION(BlueprintCallable)
+	void UnmakeCardPreview();
+
 	void PlaceCard(int32 _CardID, FVector2D _CardCoords);
 	int32 GetBiggestDistrictClusterSize(const EMEGDistrict DistrictType) const;
 	int32 GetDistrictClusterSize(const AMEG_GridCell* GridCell, const EMEGDistrict DistrictType, TArray<FVector2D>& VisitedCoords) const;
 	int32 GetRoadCount() const;
 	TArray<class AMEG_GridCell*> GetGridCells() const;
 	AMEG_GridCell* GetCellFromCoords(FVector2D _OffsetCoords) const;
+	AMEG_CardPlacer* GetCardPlacerFromCoords(FVector2D _Coords) const;
 
 protected:
 	// Called when the game starts or when spawned
@@ -40,15 +47,19 @@ protected:
 
 	TArray<class AMEG_GridCell*> GridCells;
 	TArray<AMEG_CardPlacer*> CardPlacers;
-	AMEG_CardPlacer* GetCardPlacerFromCoords(FVector2D _Coords) const;
-	
 	TArray<FVector2D> NeighborsOffset = { FVector2D(-1,0), FVector2D(1,0),FVector2D(0,-1), FVector2D(0,1) };
+
+	// Card Preview Related
+	TArray<AMEG_GridCell*> OverridenGridCells;
+	TArray<AMEG_GridCell*> GridCellPreviews;
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<AMEG_CardPlacer> CardPlacerClassBP;
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class AMEG_GridCell> GridCellClassBP;
+
+
 
 public:	
 

@@ -18,6 +18,8 @@ public:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 
+	UMEG_CardWidget* GetSelectedCard();
+
 protected:
 	void UpdateHand();
 	void FillCardsInHandArray();
@@ -25,9 +27,6 @@ protected:
 	void OnCardSelected(int32 CardID);
 	UFUNCTION()
 	void OnRequestPlaceCard(FVector2D InCoords);
-
-
-	UMEG_CardWidget* GetSelectedCard();
 
 	TArray<UMEG_CardWidget*> CardsInHand;
 

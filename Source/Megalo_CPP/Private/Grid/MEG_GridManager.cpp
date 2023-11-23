@@ -3,10 +3,14 @@
 
 #include "Grid/MEG_GridManager.h"
 #include "Kismet/GameplayStatics.h"
+#include "Blueprint/WidgetTree.h"
 #include "MEG_GM.h"
 #include "Data/MEG_CardData.h"
 #include "Grid/MEG_GridCell.h"
 #include "Grid/MEG_CardPlacer.h"
+#include "UI/MEG_CardHand.h"
+#include "UI/MEG_CardWidget.h"
+#include "UI/MEG_CellWidget.h"
 
 #define CELL_WIDTH 70
 #define  CELL_HEIGHT 50
@@ -18,6 +22,76 @@ AMEG_GridManager::AMEG_GridManager()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+}
+
+void AMEG_GridManager::MakeCardPreview(FVector2D _CardCoords)
+{
+	AMEG_GM* GameMode = Cast<AMEG_GM>(UGameplayStatics::GetGameMode(this));
+	if (!ensure(GameMode))
+		return;
+
+	//Get CardHand
+	TArray<UWidget*> HUDWidgetChildrens;
+	GameMode->HUDWidget->WidgetTree->GetAllWidgets(HUDWidgetChildrens);
+	UMEG_CardHand* CardHandWidget = nullptr;
+
+	for (UWidget* _Widget : HUDWidgetChildrens)
+	{
+		if (_Widget->GetName() == "WBP_Hand")
+		{
+			CardHandWidget = Cast<UMEG_CardHand>(_Widget);
+			if (!ensure(CardHandWidget))
+				return;
+			break;
+		}		
+	}
+
+	const UMEG_CardWidget* CardWidget = CardHandWidget->GetSelectedCard();
+	if (CardWidget == nullptr)
+		return;
+
+	const FMEG_CardData* CardData = GameMode->GetCardData(CardWidget->GetCardID());
+	if (CardData == nullptr)
+		return;
+
+	for (const TPair<EMEGCellPosition, FMEG_CellData>& _CellData : CardData->Cells)
+	{
+		const FVector2D OffsetCoords = _CardCoords + GetCellPositionOffset(_CellData.Key);
+
+		AMEG_GridCell* OveridenGridCell = GetCellFromCoords(OffsetCoords);
+
+		// If cell is already existing, hide it and add it to OverridenGridCells array
+		if (OveridenGridCell != nullptr)
+		{
+			OveridenGridCell->SetCellVisibilityAndOpacity(false, 0.0f);
+			OverridenGridCells.Add(OveridenGridCell);
+		}
+
+		// Create preview GridCell
+		AMEG_GridCell* PreviewGridCell = GetWorld()->SpawnActor<AMEG_GridCell>(GridCellClassBP);
+		GridCellPreviews.Add(PreviewGridCell);
+
+		const FVector SpawnPosition = FVector(OffsetCoords.X * CELL_WIDTH, OffsetCoords.Y * CELL_HEIGHT, DEFAULT_CELL_Z);
+		PreviewGridCell->SetActorLocation(SpawnPosition);
+		PreviewGridCell->CellCoords = OffsetCoords;
+		PreviewGridCell->SetCellVisibilityAndOpacity(true, 0.5f);
+		PreviewGridCell->UpdateCellWidget(_CellData.Value.DistrictType, _CellData.Value.Roads);
+	}
+}
+
+void AMEG_GridManager::UnmakeCardPreview()
+{
+	for (AMEG_GridCell* _GridCellPreview : GridCellPreviews)
+	{
+		_GridCellPreview->Destroy(); //ConditionalBeginDestroy(); >>> trigger breakpoint
+	}
+	for (AMEG_GridCell* _OverridenGridCell : OverridenGridCells)
+	{
+		if (_OverridenGridCell != nullptr)
+			_OverridenGridCell->SetCellVisibilityAndOpacity(true, 1.0f);
+	}
+	OverridenGridCells.Empty();
+	GridCellPreviews.Empty();
 }
 
 void AMEG_GridManager::PlaceCard(int32 _CardID, FVector2D _CardCoords)
@@ -52,6 +126,7 @@ void AMEG_GridManager::PlaceCard(int32 _CardID, FVector2D _CardCoords)
 		CurrentGridCell->UpdateCellWidget(_CellData.Value.DistrictType, _CellData.Value.Roads);
 	}
 	UpdateCardPlacers(_CardCoords);
+	UnmakeCardPreview();
 }
 
 void AMEG_GridManager::UpdateCardPlacers(FVector2D _Coords)

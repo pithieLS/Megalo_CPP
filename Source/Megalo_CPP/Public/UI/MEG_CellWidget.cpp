@@ -6,12 +6,18 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/Image.h"
 #include "Components/SizeBox.h"
+#include "Components/Overlay.h"
 #include "MEG_GM.h"
 
 void UMEG_CellWidget::UpdateCell(EMEGDistrict _DistrictType, TArray<EMEGRoad> _Roads)
 {
 	UpdateDistrict(_DistrictType);
 	UpdateRoads(_Roads);
+}
+
+UImage* UMEG_CellWidget::GetDistrictImageComponent() const
+{
+	return DistrictImage;
 }
 
 void UMEG_CellWidget::UpdateDistrict(EMEGDistrict _DistrictType)
