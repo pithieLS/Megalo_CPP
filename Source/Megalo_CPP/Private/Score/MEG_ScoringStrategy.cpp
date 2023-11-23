@@ -134,3 +134,23 @@ int32 UMEG_ScoreStackAndScrapers::GetScore(const TArray<AMEG_GridCell*>& GridCel
 
 	return Score;
 }
+
+int32 UMEG_ScoreMasterPlanned::GetScore(const TArray<AMEG_GridCell*>& GridCells, AMEG_GM* GameMode) const
+{
+	const AMEG_GridManager* GridManager = GameMode->GetGridManager();
+
+	const int32 LargestIndustrialCluster = GridManager->GetBiggestDistrictClusterSize(EMEGDistrict::Industry);
+	const int32 LargestDwellingCluster = GridManager->GetBiggestDistrictClusterSize(EMEGDistrict::Dwellings);
+
+	return LargestDwellingCluster - LargestIndustrialCluster;
+}
+
+int32 UMEG_BlockParty::GetScore(const TArray<AMEG_GridCell*>& GridCells, AMEG_GM* GameMode) const
+{
+	int32 Score = 0;
+	
+	TArray<FVector2D> BlockNeighborOffset = { FVector2D(1, 0), FVector2D(0, 1), FVector2D(1, 1) };
+	//TODO
+
+	return Score;
+}
