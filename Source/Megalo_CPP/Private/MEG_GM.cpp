@@ -20,13 +20,13 @@ void AMEG_GM::BeginPlay()
 {
 	Super::BeginPlay();
 
+	SetScoringCards();
+
 	HUDWidget = CreateWidget<UUserWidget>(GetWorld(), HUDWidgetClass);
 	if (!ensure(HUDWidget != nullptr))
 		return;
 
 	HUDWidget->AddToViewport();
-
-	SetScoringCards();
 
 	for (int32 Index = 0; Index < MAX_CARDS_CARDS_IN_HAND; Index++)
 	{
@@ -40,6 +40,7 @@ void AMEG_GM::BeginPlay()
 	int32 FirstPlacedCardID = GetAvailableCardID();
 	GridManager->PlaceCard(FirstPlacedCardID, FVector2D(0, 0));
 	PlayedCardsID.Add(FirstPlacedCardID);
+
 	UpdateScore();
 
 	UpdateBoardLimits();
