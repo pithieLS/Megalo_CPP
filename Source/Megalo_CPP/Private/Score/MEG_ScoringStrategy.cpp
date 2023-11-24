@@ -132,7 +132,8 @@ int32 UMEG_ScoreStackAndScrapers::GetScore(const TArray<AMEG_GridCell*>& GridCel
 				Score += 2;
 	}
 
-	return Score;
+	//return Score;
+	return 0;
 }
 
 int32 UMEG_ScoreMasterPlanned::GetScore(const TArray<AMEG_GridCell*>& GridCells, AMEG_GM* GameMode) const
@@ -142,15 +143,56 @@ int32 UMEG_ScoreMasterPlanned::GetScore(const TArray<AMEG_GridCell*>& GridCells,
 	const int32 LargestIndustrialCluster = GridManager->GetBiggestDistrictClusterSize(EMEGDistrict::Industry);
 	const int32 LargestDwellingCluster = GridManager->GetBiggestDistrictClusterSize(EMEGDistrict::Dwellings);
 
-	return LargestDwellingCluster - LargestIndustrialCluster;
+	//return LargestDwellingCluster - LargestIndustrialCluster;
+	return 0;
 }
 
 int32 UMEG_BlockParty::GetScore(const TArray<AMEG_GridCell*>& GridCells, AMEG_GM* GameMode) const
 {
-	int32 Score = 0;
-	
-	TArray<FVector2D> BlockNeighborOffset = { FVector2D(1, 0), FVector2D(0, 1), FVector2D(1, 1) };
-	//TODO
+	int32 GroupNb = 0;
 
-	return Score;
+	const TArray<FVector2D> BlockNeighborOffset = { FVector2D(1, 0), FVector2D(0, 1), FVector2D(1, 1) };
+	const AMEG_GridManager* GridManager = GameMode->GetGridManager();
+	if (!ensure(GridManager != nullptr))
+		return 0;
+	
+	// For each _GridCell, check neighbor's district type (R, D, DR)
+	// If one NeighborCell != _GridCell's DistrictType: check next _GridCell
+	// Else, GroupNb++
+	for (AMEG_GridCell* _GridCell : GridCells)
+	{
+		const EMEGDistrict CellDistrictType = _GridCell->GetDistrictType();
+		const FVector2D CellCoords = _GridCell->CellCoords;
+		bool isBlock = true;
+
+		//Check neighbors with offset
+		for (FVector2D _Offset : BlockNeighborOffset)
+		{
+			const FVector2D NeighbourCoords = CellCoords + _Offset;
+			const AMEG_GridCell* NeighborCell =  GridManager->GetCellFromCoords(NeighbourCoords);
+			if (NeighborCell == nullptr || NeighborCell->GetDistrictType() != CellDistrictType)
+			{
+				isBlock = false;
+				break;
+			}
+		}
+		if (isBlock)
+			GroupNb++;
+	}
+
+	// Didn't used a switch because it don't have a condition case
+	if (GroupNb == 0)
+		return -8;
+	else if (GroupNb == 1)
+		return -5;
+	else if (GroupNb == 2)
+		return -2;
+	else if (GroupNb == 3)
+		return 1;
+	else if (GroupNb == 4)
+		return 4;
+	else if (GroupNb >= 5)
+		return 7;
+
+	return 0;
 }
