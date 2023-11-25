@@ -130,13 +130,13 @@ void AMEG_GridManager::PlaceCard(int32 _CardID, FVector2D _CardCoords)
 		if (IsCardRotated)
 		{
 			if (_CellData.Key == EMEGCellPosition::TL)
-				OffsetCoords = GetCellPositionOffset(EMEGCellPosition::BL);
-			else if (_CellData.Key == EMEGCellPosition::TR)
 				OffsetCoords = GetCellPositionOffset(EMEGCellPosition::BR);
+			else if (_CellData.Key == EMEGCellPosition::TR)
+				OffsetCoords = GetCellPositionOffset(EMEGCellPosition::BL);
 			else if (_CellData.Key == EMEGCellPosition::BL)
-				OffsetCoords = GetCellPositionOffset(EMEGCellPosition::TL);
-			else if (_CellData.Key == EMEGCellPosition::BR)
 				OffsetCoords = GetCellPositionOffset(EMEGCellPosition::TR);
+			else if (_CellData.Key == EMEGCellPosition::BR)
+				OffsetCoords = GetCellPositionOffset(EMEGCellPosition::TL);
 		}
 		else
 			OffsetCoords = GetCellPositionOffset(_CellData.Key);
