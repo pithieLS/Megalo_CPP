@@ -26,8 +26,7 @@ protected:
 	void MoveForward(float MovementDelta);
 	void MoveRight(float MovementDelta);
 	void MoveUp(float MovementDelta);
-
-	
+	void OnRotatePressed();
 
 	AMEG_GM* GameMode;
 

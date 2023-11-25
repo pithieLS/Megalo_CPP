@@ -6,6 +6,7 @@
 #include "Components/SceneComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Camera/CameraComponent.h"
+#include "Grid//MEG_GridManager.h"
 #include "GameFramework/FloatingPawnMovement.h"
 #include "MEG_GM.h"
 
@@ -85,6 +86,11 @@ void AMEG_Pawn::MoveUp(float MovementDelta)
 
 }
 
+void AMEG_Pawn::OnRotatePressed()
+{
+	GameMode->GetGridManager()->RotateCard();
+}
+
 // Called every frame
 void AMEG_Pawn::Tick(float DeltaTime)
 {
@@ -99,6 +105,7 @@ void AMEG_Pawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AMEG_Pawn::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AMEG_Pawn::MoveRight);
-	PlayerInputComponent->BindAxis("MoveUp", this, &AMEG_Pawn::MoveUp);
+	PlayerInputComponent->BindAxis("MoveUp", this, &AMEG_Pawn::MoveRight);
+	PlayerInputComponent->BindAction("RotateCard", IE_Pressed, this, &AMEG_Pawn::OnRotatePressed);
 }
 

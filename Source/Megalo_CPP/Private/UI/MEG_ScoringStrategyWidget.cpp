@@ -20,7 +20,7 @@ void UMEG_ScoringStrategyWidget::NativeConstruct()
 	ScoringImages.Add(ScoringImageTwo);
 	ScoringImages.Add(ScoringImageThree);
 
-	for (int32 index = 0; index < GameMode->ScoringCardsID.Num(); index++)
+	for (int32 index = 0; index < ScoringImages.Num(); index++)
 	{
 		const FMEG_CardData* _CardData = GameMode->GetCardData(GameMode->ScoringCardsID[index]);
 		if (!ensure(_CardData != nullptr))
@@ -28,11 +28,11 @@ void UMEG_ScoringStrategyWidget::NativeConstruct()
 
 		const UMEG_ScoringStrategy* ScoringStrategyCDO = Cast<UMEG_ScoringStrategy>(_CardData->ScoringClass->GetDefaultObject());
 		if (!ensure(ScoringStrategyCDO != nullptr))
-			return;
+			continue;
 
 		UTexture2D* _CardTexture = ScoringStrategyCDO->ScoringImage;
 		if (!ensure(_CardTexture != nullptr))
-			return;
+			continue;
 
 		ScoringImages[index]->SetBrushFromTexture(_CardTexture);
 	}

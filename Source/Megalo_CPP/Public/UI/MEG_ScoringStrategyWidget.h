@@ -29,5 +29,5 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	UImage* ScoringImageThree;
 	
-	TArray<UImage*> ScoringImages = {ScoringImageOne, ScoringImageTwo, ScoringImageThree};
+	TArray<UImage*> ScoringImages;
 };

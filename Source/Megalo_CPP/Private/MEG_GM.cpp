@@ -11,6 +11,7 @@
 #include "Score/MEG_ScoringStrategy.h"
 #include "Grid/MEG_GridCell.h"
 #include "Grid/MEG_CardPlacer.h"
+#include "UI/MEG_HUDWidget.h"
 
 
 #define MAX_CARDS_CARDS_IN_HAND 3
@@ -20,9 +21,9 @@ void AMEG_GM::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SetScoringCards();
+	SetScoringCards();	
 
-	HUDWidget = CreateWidget<UUserWidget>(GetWorld(), HUDWidgetClass);
+	HUDWidget = Cast<UMEG_HUDWidget>(CreateWidget<UUserWidget>(GetWorld(), HUDWidgetClass));
 	if (!ensure(HUDWidget != nullptr))
 		return;
 
@@ -31,7 +32,7 @@ void AMEG_GM::BeginPlay()
 	for (int32 Index = 0; Index < MAX_CARDS_CARDS_IN_HAND; Index++)
 	{
 		DrawCard();
-	}		
+	}
 
 	GridManager = GetWorld()->SpawnActor<AMEG_GridManager>(GridManagerClassBP);
 	if (!ensure(GridManager))

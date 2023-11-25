@@ -11,6 +11,7 @@
 #include "UI/MEG_CardHand.h"
 #include "UI/MEG_CardWidget.h"
 #include "UI/MEG_CellWidget.h"
+#include "UI/MEG_HUDWidget.h"
 
 #define CELL_WIDTH 70
 #define  CELL_HEIGHT 50
@@ -30,21 +31,9 @@ void AMEG_GridManager::MakeCardPreview(FVector2D _CardCoords)
 	if (!ensure(GameMode))
 		return;
 
-	//Get CardHand
-	TArray<UWidget*> HUDWidgetChildrens;
-	GameMode->HUDWidget->WidgetTree->GetAllWidgets(HUDWidgetChildrens);
-	UMEG_CardHand* CardHandWidget = nullptr;
-
-	for (UWidget* _Widget : HUDWidgetChildrens)
-	{
-		if (_Widget->GetName() == "WBP_Hand")
-		{
-			CardHandWidget = Cast<UMEG_CardHand>(_Widget);
-			if (!ensure(CardHandWidget))
-				return;
-			break;
-		}		
-	}
+	UMEG_CardHand* CardHandWidget = GameMode->HUDWidget->WBP_Hand;
+	if (!ensure(CardHandWidget != nullptr))
+		return;
 
 	const UMEG_CardWidget* CardWidget = CardHandWidget->GetSelectedCard();
 	if (CardWidget == nullptr)
@@ -56,9 +45,38 @@ void AMEG_GridManager::MakeCardPreview(FVector2D _CardCoords)
 
 	for (const TPair<EMEGCellPosition, FMEG_CellData>& _CellData : CardData->Cells)
 	{
-		const FVector2D OffsetCoords = _CardCoords + GetCellPositionOffset(_CellData.Key);
+		FVector2D OffsetCoords;
+		if (IsCardRotated)
+		{
+			if (_CellData.Key == EMEGCellPosition::TL)
+				OffsetCoords = GetCellPositionOffset(EMEGCellPosition::BR);
+			else if(_CellData.Key == EMEGCellPosition::TR)
+				OffsetCoords = GetCellPositionOffset(EMEGCellPosition::BL);
+			else if (_CellData.Key == EMEGCellPosition::BL)
+				OffsetCoords = GetCellPositionOffset(EMEGCellPosition::TR);
+			else if (_CellData.Key == EMEGCellPosition::BR)
+				OffsetCoords = GetCellPositionOffset(EMEGCellPosition::TL);
+		}
+		else
+			OffsetCoords = GetCellPositionOffset(_CellData.Key);
 
-		AMEG_GridCell* OveridenGridCell = GetCellFromCoords(OffsetCoords);
+		const FVector2D _CardOffsetCoords = _CardCoords + OffsetCoords;
+
+		TArray<EMEGRoad> Roads = _CellData.Value.Roads;
+		if (IsCardRotated)
+			for (int32 index = 0; index < Roads.Num(); index++)
+			{
+				if (Roads[index] == EMEGRoad::Up)
+					Roads[index] = EMEGRoad::Down;
+				else if (Roads[index] == EMEGRoad::Down)
+					Roads[index] = EMEGRoad::Up;
+				else if (Roads[index] == EMEGRoad::Left)
+					Roads[index] = EMEGRoad::Right;
+				else if (Roads[index] == EMEGRoad::Right)
+					Roads[index] = EMEGRoad::Left;
+			}
+
+		AMEG_GridCell* OveridenGridCell = GetCellFromCoords(_CardOffsetCoords);
 
 		// If cell is already existing, hide it and add it to OverridenGridCells array
 		if (OveridenGridCell != nullptr)
@@ -71,15 +89,17 @@ void AMEG_GridManager::MakeCardPreview(FVector2D _CardCoords)
 		AMEG_GridCell* PreviewGridCell = GetWorld()->SpawnActor<AMEG_GridCell>(GridCellClassBP);
 		GridCellPreviews.Add(PreviewGridCell);
 
-		const FVector SpawnPosition = FVector(OffsetCoords.X * CELL_WIDTH, OffsetCoords.Y * CELL_HEIGHT, DEFAULT_CELL_Z);
+		const FVector SpawnPosition = FVector(_CardOffsetCoords.X * CELL_WIDTH, _CardOffsetCoords.Y * CELL_HEIGHT, DEFAULT_CELL_Z);
 		PreviewGridCell->SetActorLocation(SpawnPosition);
-		PreviewGridCell->CellCoords = OffsetCoords;
+		PreviewGridCell->CellCoords = _CardOffsetCoords;
 		PreviewGridCell->SetCellVisibilityAndOpacity(true, 0.5f);
-		PreviewGridCell->UpdateCellWidget(_CellData.Value.DistrictType, _CellData.Value.Roads);
+		PreviewGridCell->UpdateCellWidget(_CellData.Value.DistrictType, Roads);
 	}
+
+	PreviewCardCoords = _CardCoords;
 }
 
-void AMEG_GridManager::UnmakeCardPreview()
+void AMEG_GridManager::UndoCardPreview()
 {
 	for (AMEG_GridCell* _GridCellPreview : GridCellPreviews)
 	{
@@ -106,9 +126,38 @@ void AMEG_GridManager::PlaceCard(int32 _CardID, FVector2D _CardCoords)
 
 	for (const TPair<EMEGCellPosition, FMEG_CellData>& _CellData : CardData->Cells)
 	{
-		const FVector2D OffsetCoords = _CardCoords + GetCellPositionOffset(_CellData.Key);
+		FVector2D OffsetCoords;
+		if (IsCardRotated)
+		{
+			if (_CellData.Key == EMEGCellPosition::TL)
+				OffsetCoords = GetCellPositionOffset(EMEGCellPosition::BL);
+			else if (_CellData.Key == EMEGCellPosition::TR)
+				OffsetCoords = GetCellPositionOffset(EMEGCellPosition::BR);
+			else if (_CellData.Key == EMEGCellPosition::BL)
+				OffsetCoords = GetCellPositionOffset(EMEGCellPosition::TL);
+			else if (_CellData.Key == EMEGCellPosition::BR)
+				OffsetCoords = GetCellPositionOffset(EMEGCellPosition::TR);
+		}
+		else
+			OffsetCoords = GetCellPositionOffset(_CellData.Key);
 
-		AMEG_GridCell* CurrentGridCell = GetCellFromCoords(OffsetCoords);
+		const FVector2D _CardOffsetCoords = _CardCoords + OffsetCoords;
+
+		TArray<EMEGRoad> Roads = _CellData.Value.Roads;
+		if (IsCardRotated)
+			for (int32 index = 0; index < Roads.Num(); index++)
+			{
+				if (Roads[index] == EMEGRoad::Up)
+					Roads[index] = EMEGRoad::Down;
+				else if (Roads[index] == EMEGRoad::Down)
+					Roads[index] = EMEGRoad::Up;
+				else if (Roads[index] == EMEGRoad::Left)
+					Roads[index] = EMEGRoad::Right;
+				else if (Roads[index] == EMEGRoad::Right)
+					Roads[index] = EMEGRoad::Left;
+			}
+
+		AMEG_GridCell* CurrentGridCell = GetCellFromCoords(_CardOffsetCoords);
 		if (CurrentGridCell == nullptr)
 		{
 			CurrentGridCell = GetWorld()->SpawnActor<AMEG_GridCell>(GridCellClassBP);
@@ -117,16 +166,17 @@ void AMEG_GridManager::PlaceCard(int32 _CardID, FVector2D _CardCoords)
 
 			GridCells.Add(CurrentGridCell);
 
-			const FVector SpawnPosition = FVector(OffsetCoords.X * CELL_WIDTH, OffsetCoords.Y * CELL_HEIGHT, DEFAULT_CELL_Z);
+			const FVector SpawnPosition = FVector(_CardOffsetCoords.X * CELL_WIDTH, _CardOffsetCoords.Y * CELL_HEIGHT, DEFAULT_CELL_Z);
 			CurrentGridCell->SetActorLocation(SpawnPosition);
-			CurrentGridCell->CellCoords = OffsetCoords;
+			CurrentGridCell->CellCoords = _CardOffsetCoords;
 		}
 		if (!ensure(CurrentGridCell != nullptr))
 			continue;
-		CurrentGridCell->UpdateCellWidget(_CellData.Value.DistrictType, _CellData.Value.Roads);
+		CurrentGridCell->UpdateCellWidget(_CellData.Value.DistrictType, Roads);
 	}
 	UpdateCardPlacers(_CardCoords);
-	UnmakeCardPreview();
+	UndoCardPreview();
+	IsCardRotated = false;
 }
 
 void AMEG_GridManager::UpdateCardPlacers(FVector2D _Coords)
@@ -168,6 +218,21 @@ AMEG_CardPlacer* AMEG_GridManager::GetCardPlacerFromCoords(FVector2D _Coords) co
 	if (Placer == nullptr)
 		return nullptr;
 	return *Placer;
+}
+
+void AMEG_GridManager::RotateCard()
+{
+	AMEG_GM* GameMode = Cast<AMEG_GM>(UGameplayStatics::GetGameMode(this));
+	if (!ensure(GameMode != nullptr))
+		return;
+
+	if (GameMode->HUDWidget->WBP_Hand->GetSelectedCard() == nullptr)
+		return;
+
+	IsCardRotated = !IsCardRotated;
+
+	UndoCardPreview();
+	MakeCardPreview(PreviewCardCoords);
 }
 
 // Called when the game starts or when spawned

@@ -180,19 +180,21 @@ int32 UMEG_BlockParty::GetScore(const TArray<AMEG_GridCell*>& GridCells, AMEG_GM
 			GroupNb++;
 	}
 
-	// Didn't used a switch because it don't have a condition case
-	if (GroupNb == 0)
-		return -8;
-	else if (GroupNb == 1)
-		return -5;
-	else if (GroupNb == 2)
-		return -2;
-	else if (GroupNb == 3)
-		return 1;
-	else if (GroupNb == 4)
-		return 4;
-	else if (GroupNb >= 5)
-		return 7;
+	//// Didn't used a switch because it don't have a condition case
+	//if (GroupNb == 0)
+	//	return -8;
+	//else if (GroupNb == 1)
+	//	return -5;
+	//else if (GroupNb == 2)
+	//	return -2;
+	//else if (GroupNb == 3)
+	//	return 1;
+	//else if (GroupNb == 4)
+	//	return 4;
+	//else if (GroupNb >= 5)
+	//	return 7;
+
+	//return 0;
 
 	return 0;
 }

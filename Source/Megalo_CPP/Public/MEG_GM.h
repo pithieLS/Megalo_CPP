@@ -40,7 +40,7 @@ public:
 	TArray<int32> DrawnCardsID;
 	TArray<int32> PlayedCardsID;
 	TArray<int32> ScoringCardsID;
-	UUserWidget* HUDWidget;
+	class UMEG_HUDWidget* HUDWidget;
 
 	UPROPERTY(EditDefaultsOnly)
 	TArray<FMEG_CardData> Cards;

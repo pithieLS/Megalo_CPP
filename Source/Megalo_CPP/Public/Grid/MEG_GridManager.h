@@ -25,7 +25,7 @@ public:
 	void MakeCardPreview(FVector2D _CardCoords);
 
 	UFUNCTION(BlueprintCallable)
-	void UnmakeCardPreview();
+	void UndoCardPreview();
 
 	void PlaceCard(int32 _CardID, FVector2D _CardCoords);
 	int32 GetBiggestDistrictClusterSize(const EMEGDistrict DistrictType) const;
@@ -34,6 +34,7 @@ public:
 	TArray<class AMEG_GridCell*> GetGridCells() const;
 	AMEG_GridCell* GetCellFromCoords(FVector2D _OffsetCoords) const;
 	AMEG_CardPlacer* GetCardPlacerFromCoords(FVector2D _Coords) const;
+	void RotateCard();
 
 protected:
 	// Called when the game starts or when spawned
@@ -45,6 +46,8 @@ protected:
 	const FVector2D GetRoadNeighborOffset(const EMEGRoad& Road) const;
 	const EMEGRoad GetOppositeRoad(const EMEGRoad InitialDirection) const;
 
+	bool IsCardRotated = false;
+
 	TArray<class AMEG_GridCell*> GridCells;
 	TArray<AMEG_CardPlacer*> CardPlacers;
 	TArray<FVector2D> NeighborsOffset = { FVector2D(-1,0), FVector2D(1,0),FVector2D(0,-1), FVector2D(0,1) };
@@ -52,6 +55,7 @@ protected:
 	// Card Preview Related
 	TArray<AMEG_GridCell*> OverridenGridCells;
 	TArray<AMEG_GridCell*> GridCellPreviews;
+	FVector2D PreviewCardCoords;
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<AMEG_CardPlacer> CardPlacerClassBP;
