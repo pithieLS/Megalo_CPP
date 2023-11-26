@@ -198,3 +198,116 @@ int32 UMEG_BlockParty::GetScore(const TArray<AMEG_GridCell*>& GridCells, AMEG_GM
 
 	return 0;
 }
+
+
+//int32 UMEG_TheOutskirsts::GetScore(const TArray<AMEG_GridCell*>& GridCells, AMEG_GM* GameMode) const
+//{
+//	int32 Score = 0;
+//
+//	TMap<AMEG_GridCell*, TArray<FVector2D>> EmptyNeighborCells;
+//	TMap<FVector2D, uint8> NeighbourOffsetsDirection = {{FVector2D(0, -1), 0},
+//													{FVector2D(1, 0), 1},
+//													{FVector2D(0, 1), 2},
+//													{FVector2D(-1, 0), 3}};
+//
+//	for (AMEG_GridCell* _GridCell : GridCells)
+//	{
+//		TArray<FVector2D> EmptyNeighborOffsets;
+//
+//		for (TPair<FVector2D, uint8> _NeighbourOffsetDirection : NeighbourOffsetsDirection)
+//		{
+//			if (GameMode->GetGridManager()->GetCellFromCoords(_NeighbourOffsetDirection.Key) == nullptr)
+//			{
+//				EmptyNeighborOffsets.Add(_NeighbourOffsetDirection.Key);
+//			}
+//		}
+//		EmptyNeighborCells.Add(_GridCell, EmptyNeighborOffsets);
+//	}
+//
+//	for (TPair<AMEG_GridCell*, TArray<FVector2D>> _EmptyNeighborOffsetCell : EmptyNeighborCells)
+//	{
+//		TArray<EMEGRoad> Roads = _EmptyNeighborOffsetCell.Key->Roads;
+//		bool isRoadEndAtEdge = false;
+//
+//		for (EMEGRoad _Road : Roads)
+//		{
+//			for (FVector2D _EmptyNeighborOffset : _EmptyNeighborOffsetCell.Value)
+//			{
+//				if (NeighbourOffsetsDirection.Find(_EmptyNeighborOffset) != nullptr)
+//					if (*NeighbourOffsetsDirection.Find(_EmptyNeighborOffset) == (uint8)_Road)
+//					{
+//						Score--;
+//						isRoadEndAtEdge = true;
+//						break;
+//					}
+//			}
+//			if (isRoadEndAtEdge)
+//				break;
+//		}
+//		if (!isRoadEndAtEdge)
+//			Score++;
+//
+//	}
+//
+//	return Score;
+//}
+
+int32 UMEG_CentralPerks::GetScore(const TArray<AMEG_GridCell*>& GridCells, AMEG_GM* GameMode) const
+{
+	int32 Score = 0;
+
+	const TArray<FVector2D> NeighbourOffsets = { FVector2D(0, -1), FVector2D(1, 0),
+												FVector2D(0, 1), FVector2D(-1, 0) };
+
+	const TArray<AMEG_GridCell*> InCityParcCells = GridCells.FilterByPredicate([this, NeighbourOffsets, GameMode](const AMEG_GridCell* _GridCell)
+		{
+			bool isParkCell = false;
+			bool isInCity = true;
+
+			// Check if it is the cell is a Parc district
+			if (_GridCell->GetDistrictType() != EMEGDistrict::Parc)
+				return false;
+
+			// If so, check if cell has any empty neighbor
+			for (FVector2D _Offset : NeighbourOffsets)
+			{
+				FVector2D NeighborCoords = _GridCell->CellCoords + _Offset;
+				if (GameMode->GetGridManager()->GetCellFromCoords(NeighborCoords) == nullptr)
+				{
+					isInCity = false;
+					break;
+				}
+			}
+
+			return isInCity;
+		});
+
+	const TArray<AMEG_GridCell*> OutCityParcCells = GridCells.FilterByPredicate([this, NeighbourOffsets, GameMode](const AMEG_GridCell* _GridCell)
+		{
+			bool isParkCell = false;
+			bool isInCity = true;
+
+			// Check if it is the cell is a Parc district
+			if (_GridCell->GetDistrictType() != EMEGDistrict::Parc)
+				return false;
+
+			// If so, check if cell has any empty neighbor
+			for (FVector2D _Offset : NeighbourOffsets)
+			{
+				FVector2D NeighborCoords = _GridCell->CellCoords + _Offset;
+				if (GameMode->GetGridManager()->GetCellFromCoords(NeighborCoords) == nullptr)
+				{
+					isInCity = false;
+					break;
+				}
+			}
+
+			return !isInCity;
+		});
+
+	Score += InCityParcCells.Num();
+	Score -= OutCityParcCells.Num() * 2;
+
+	//return Score;
+	return 0;
+}

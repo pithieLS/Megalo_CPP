@@ -76,3 +76,23 @@ public:
 	virtual int32 GetScore(const TArray<AMEG_GridCell*>& GridCells, AMEG_GM* GameMode) const override;
 
 };
+
+UCLASS(Blueprintable)
+class MEGALO_CPP_API UMEG_CentralPerks : public UMEG_ScoringStrategy
+{
+	GENERATED_BODY()
+
+public:
+	virtual int32 GetScore(const TArray<AMEG_GridCell*>& GridCells, AMEG_GM* GameMode) const override;
+
+};
+
+//UCLASS(Blueprintable)
+//class MEGALO_CPP_API UMEG_TheOutskirsts : public UMEG_ScoringStrategy
+//{
+//	GENERATED_BODY()
+//
+//public:
+//	virtual int32 GetScore(const TArray<AMEG_GridCell*>& GridCells, AMEG_GM* GameMode) const override;
+//
+//};
