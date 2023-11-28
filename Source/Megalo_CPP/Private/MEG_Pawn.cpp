@@ -88,7 +88,7 @@ void AMEG_Pawn::MoveUp(float MovementDelta)
 
 void AMEG_Pawn::OnRotatePressed()
 {
-	GameMode->GetGridManager()->RotateCard();
+	GameMode->OnRotatePressedDelegate.ExecuteIfBound();
 }
 
 // Called every frame
@@ -105,7 +105,7 @@ void AMEG_Pawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AMEG_Pawn::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AMEG_Pawn::MoveRight);
-	PlayerInputComponent->BindAxis("MoveUp", this, &AMEG_Pawn::MoveRight);
+	PlayerInputComponent->BindAxis("MoveUp", this, &AMEG_Pawn::MoveUp);
 	PlayerInputComponent->BindAction("RotateCard", IE_Pressed, this, &AMEG_Pawn::OnRotatePressed);
 }
 

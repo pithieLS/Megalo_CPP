@@ -35,6 +35,11 @@ public:
 		float MaxL = 0;
 	} BoardLimits;
 
+	int32 FirstCardScore = 0;
+	int32 SecondCardScore = 0;
+	int32 ThirdCardScore = 0;
+	int32 RoadScore = 0;
+	int32 ClustersScore = 0;
 
 //Card containers
 	TArray<int32> DrawnCardsID;
@@ -50,6 +55,12 @@ public:
 
 	DECLARE_DELEGATE(FOnCardHandUpdated)
 	FOnCardHandUpdated OnCardHandUpdatedDelegate;
+
+	DECLARE_DELEGATE(FOnRotatePressed)
+	FOnRotatePressed OnRotatePressedDelegate;
+
+	DECLARE_MULTICAST_DELEGATE(FOnScoreUpdated)
+	FOnScoreUpdated OnScoreUpdatedDelegate;
 
 	DECLARE_DELEGATE_OneParam(FOnCardSelected, int32 CardID)
 	FOnCardSelected OnCardSelectedDelegate;

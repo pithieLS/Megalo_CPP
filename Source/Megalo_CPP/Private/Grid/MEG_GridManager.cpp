@@ -43,38 +43,17 @@ void AMEG_GridManager::MakeCardPreview(FVector2D _CardCoords)
 	if (CardData == nullptr)
 		return;
 
+	// If card is rotated, change cell position and road direction
 	for (const TPair<EMEGCellPosition, FMEG_CellData>& _CellData : CardData->Cells)
 	{
-		FVector2D OffsetCoords;
+		// If card is rotated, invert cell data
+		TPair<EMEGCellPosition, FMEG_CellData> NewCellData;
 		if (IsCardRotated)
-		{
-			if (_CellData.Key == EMEGCellPosition::TL)
-				OffsetCoords = GetCellPositionOffset(EMEGCellPosition::BR);
-			else if(_CellData.Key == EMEGCellPosition::TR)
-				OffsetCoords = GetCellPositionOffset(EMEGCellPosition::BL);
-			else if (_CellData.Key == EMEGCellPosition::BL)
-				OffsetCoords = GetCellPositionOffset(EMEGCellPosition::TR);
-			else if (_CellData.Key == EMEGCellPosition::BR)
-				OffsetCoords = GetCellPositionOffset(EMEGCellPosition::TL);
-		}
+			NewCellData = InvertCellData(_CellData);
 		else
-			OffsetCoords = GetCellPositionOffset(_CellData.Key);
+			NewCellData = _CellData;
 
-		const FVector2D _CardOffsetCoords = _CardCoords + OffsetCoords;
-
-		TArray<EMEGRoad> Roads = _CellData.Value.Roads;
-		if (IsCardRotated)
-			for (int32 index = 0; index < Roads.Num(); index++)
-			{
-				if (Roads[index] == EMEGRoad::Up)
-					Roads[index] = EMEGRoad::Down;
-				else if (Roads[index] == EMEGRoad::Down)
-					Roads[index] = EMEGRoad::Up;
-				else if (Roads[index] == EMEGRoad::Left)
-					Roads[index] = EMEGRoad::Right;
-				else if (Roads[index] == EMEGRoad::Right)
-					Roads[index] = EMEGRoad::Left;
-			}
+		const FVector2D _CardOffsetCoords = _CardCoords + GetCellPositionOffset(NewCellData.Key);
 
 		AMEG_GridCell* OveridenGridCell = GetCellFromCoords(_CardOffsetCoords);
 
@@ -93,7 +72,7 @@ void AMEG_GridManager::MakeCardPreview(FVector2D _CardCoords)
 		PreviewGridCell->SetActorLocation(SpawnPosition);
 		PreviewGridCell->CellCoords = _CardOffsetCoords;
 		PreviewGridCell->SetCellVisibilityAndOpacity(true, 0.5f);
-		PreviewGridCell->UpdateCellWidget(_CellData.Value.DistrictType, Roads);
+		PreviewGridCell->UpdateCellWidget(_CellData.Value.DistrictType, NewCellData.Value.Roads);
 	}
 
 	PreviewCardCoords = _CardCoords;
@@ -126,36 +105,13 @@ void AMEG_GridManager::PlaceCard(int32 _CardID, FVector2D _CardCoords)
 
 	for (const TPair<EMEGCellPosition, FMEG_CellData>& _CellData : CardData->Cells)
 	{
-		FVector2D OffsetCoords;
+		TPair<EMEGCellPosition, FMEG_CellData> NewCellData;
 		if (IsCardRotated)
-		{
-			if (_CellData.Key == EMEGCellPosition::TL)
-				OffsetCoords = GetCellPositionOffset(EMEGCellPosition::BR);
-			else if (_CellData.Key == EMEGCellPosition::TR)
-				OffsetCoords = GetCellPositionOffset(EMEGCellPosition::BL);
-			else if (_CellData.Key == EMEGCellPosition::BL)
-				OffsetCoords = GetCellPositionOffset(EMEGCellPosition::TR);
-			else if (_CellData.Key == EMEGCellPosition::BR)
-				OffsetCoords = GetCellPositionOffset(EMEGCellPosition::TL);
-		}
+			NewCellData = InvertCellData(_CellData);
 		else
-			OffsetCoords = GetCellPositionOffset(_CellData.Key);
+			NewCellData = _CellData;
 
-		const FVector2D _CardOffsetCoords = _CardCoords + OffsetCoords;
-
-		TArray<EMEGRoad> Roads = _CellData.Value.Roads;
-		if (IsCardRotated)
-			for (int32 index = 0; index < Roads.Num(); index++)
-			{
-				if (Roads[index] == EMEGRoad::Up)
-					Roads[index] = EMEGRoad::Down;
-				else if (Roads[index] == EMEGRoad::Down)
-					Roads[index] = EMEGRoad::Up;
-				else if (Roads[index] == EMEGRoad::Left)
-					Roads[index] = EMEGRoad::Right;
-				else if (Roads[index] == EMEGRoad::Right)
-					Roads[index] = EMEGRoad::Left;
-			}
+		const FVector2D _CardOffsetCoords = _CardCoords + GetCellPositionOffset(NewCellData.Key);
 
 		AMEG_GridCell* CurrentGridCell = GetCellFromCoords(_CardOffsetCoords);
 		if (CurrentGridCell == nullptr)
@@ -172,7 +128,7 @@ void AMEG_GridManager::PlaceCard(int32 _CardID, FVector2D _CardCoords)
 		}
 		if (!ensure(CurrentGridCell != nullptr))
 			continue;
-		CurrentGridCell->UpdateCellWidget(_CellData.Value.DistrictType, Roads);
+		CurrentGridCell->UpdateCellWidget(_CellData.Value.DistrictType, NewCellData.Value.Roads);
 	}
 	UpdateCardPlacers(_CardCoords);
 	UndoCardPreview();
@@ -235,11 +191,59 @@ void AMEG_GridManager::RotateCard()
 	MakeCardPreview(PreviewCardCoords);
 }
 
+TPair<EMEGCellPosition, FMEG_CellData> AMEG_GridManager::InvertCellData(TPair<EMEGCellPosition, FMEG_CellData> _CellData) const
+{
+	TPair<EMEGCellPosition, FMEG_CellData> NewCardData;
+
+	// Invert cell offset
+	switch (_CellData.Key)
+	{
+	case EMEGCellPosition::TL:
+		NewCardData.Key = EMEGCellPosition::BR;
+		break;
+	case EMEGCellPosition::TR:
+		NewCardData.Key = EMEGCellPosition::BL;
+		break;
+	case EMEGCellPosition::BL:
+		NewCardData.Key = EMEGCellPosition::TR;
+		break;
+	case EMEGCellPosition::BR:
+		NewCardData.Key = EMEGCellPosition::TL;
+		break;
+	default:
+		break;
+	}
+
+	// Invert roads
+	for (int32 Index = 0; Index < _CellData.Value.Roads.Num(); Index++)
+	{
+		NewCardData.Value.Roads.Add(GetOppositeRoad(_CellData.Value.Roads[Index]));
+	}
+
+	return NewCardData;
+}
+
 // Called when the game starts or when spawned
 void AMEG_GridManager::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	AMEG_GM* GameMode = Cast<AMEG_GM>(UGameplayStatics::GetGameMode(this));
+	if (!ensure(GameMode != nullptr))
+		return;
+
+	GameMode->OnRotatePressedDelegate.BindUObject(this, &AMEG_GridManager::RotateCard);
+}
+
+void AMEG_GridManager::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	AMEG_GM* GameMode = Cast<AMEG_GM>(UGameplayStatics::GetGameMode(this));
+	if (!ensure(GameMode != nullptr))
+		return;
+
+	GameMode->OnRotatePressedDelegate.Unbind();
 }
 
 const FVector2D AMEG_GridManager::GetCellPositionOffset(EMEGCellPosition _CellPosition) const
@@ -346,6 +350,30 @@ int32 AMEG_GridManager::GetRoadCount() const
 TArray<class AMEG_GridCell*> AMEG_GridManager::GetGridCells() const
 {
 	return GridCells;
+}
+
+TArray<AMEG_GridCell*> AMEG_GridManager::GetAllCellsFromAxis(int32 AxisValue)
+{
+	AMEG_GM* GameMode = Cast<AMEG_GM>(UGameplayStatics::GetGameMode(this));
+	//if (!ensure(GameMode != nullptr))
+	//	return;
+
+
+	const TArray<AMEG_GridCell*> AxisCells = GetGridCells().FilterByPredicate([this, AxisValue](const AMEG_GridCell* _AxisCell)
+		{
+			if (AxisValue == 0)
+			{
+				if (_AxisCell->CellCoords.X == AxisValue)
+					return true;
+			}
+			else
+			{
+				if (_AxisCell->CellCoords.Y == AxisValue)
+					return true;
+			}
+		});
+
+	return AxisCells;
 }
 
 void AMEG_GridManager::VisitSingleRoad(const AMEG_GridCell* _GridCell, TArray<FVector2D>& VisitedCoords) const

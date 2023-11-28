@@ -24,8 +24,7 @@ int32 UMEG_ScoreGoGreen::GetScore(const TArray<AMEG_GridCell*>& GridCells, AMEG_
 			break;
 		}
 	}
-	//return Score;
-	return 0;
+	return Score;
 }
 
 int32 UMEG_ScoreBloomBloom::GetScore(const TArray<AMEG_GridCell*>& GridCells, AMEG_GM* GameMode) const
@@ -90,8 +89,7 @@ int32 UMEG_ScoreBloomBloom::GetScore(const TArray<AMEG_GridCell*>& GridCells, AM
 			Score--;
 	}
 
-	//return Score;
-	return 0;
+	return Score;
 }
 
 int32 UMEG_ScoreStackAndScrapers::GetScore(const TArray<AMEG_GridCell*>& GridCells, AMEG_GM* GameMode) const
@@ -132,8 +130,7 @@ int32 UMEG_ScoreStackAndScrapers::GetScore(const TArray<AMEG_GridCell*>& GridCel
 				Score += 2;
 	}
 
-	//return Score;
-	return 0;
+	return Score;
 }
 
 int32 UMEG_ScoreMasterPlanned::GetScore(const TArray<AMEG_GridCell*>& GridCells, AMEG_GM* GameMode) const
@@ -143,8 +140,7 @@ int32 UMEG_ScoreMasterPlanned::GetScore(const TArray<AMEG_GridCell*>& GridCells,
 	const int32 LargestIndustrialCluster = GridManager->GetBiggestDistrictClusterSize(EMEGDistrict::Industry);
 	const int32 LargestDwellingCluster = GridManager->GetBiggestDistrictClusterSize(EMEGDistrict::Dwellings);
 
-	//return LargestDwellingCluster - LargestIndustrialCluster;
-	return 0;
+	return LargestDwellingCluster - LargestIndustrialCluster;
 }
 
 int32 UMEG_BlockParty::GetScore(const TArray<AMEG_GridCell*>& GridCells, AMEG_GM* GameMode) const
@@ -156,17 +152,17 @@ int32 UMEG_BlockParty::GetScore(const TArray<AMEG_GridCell*>& GridCells, AMEG_GM
 	if (!ensure(GridManager != nullptr))
 		return 0;
 	
-	// For each _GridCell, check neighbor's district type (R, D, DR)
+	// For each cell, check neighbor's district type (R, D, DR)
 	// If one NeighborCell != _GridCell's DistrictType: check next _GridCell
 	// Else, GroupNb++
-	for (AMEG_GridCell* _GridCell : GridCells)
+	for (const AMEG_GridCell* _GridCell : GridCells)
 	{
 		const EMEGDistrict CellDistrictType = _GridCell->GetDistrictType();
 		const FVector2D CellCoords = _GridCell->CellCoords;
 		bool isBlock = true;
 
-		//Check neighbors with offset
-		for (FVector2D _Offset : BlockNeighborOffset)
+		// Check neighbors, if the cell is null or the cell has a different district type, check next cell
+		for (const FVector2D& _Offset : BlockNeighborOffset)
 		{
 			const FVector2D NeighbourCoords = CellCoords + _Offset;
 			const AMEG_GridCell* NeighborCell =  GridManager->GetCellFromCoords(NeighbourCoords);
@@ -180,21 +176,19 @@ int32 UMEG_BlockParty::GetScore(const TArray<AMEG_GridCell*>& GridCells, AMEG_GM
 			GroupNb++;
 	}
 
-	//// Didn't used a switch because it don't have a condition case
-	//if (GroupNb == 0)
-	//	return -8;
-	//else if (GroupNb == 1)
-	//	return -5;
-	//else if (GroupNb == 2)
-	//	return -2;
-	//else if (GroupNb == 3)
-	//	return 1;
-	//else if (GroupNb == 4)
-	//	return 4;
-	//else if (GroupNb >= 5)
-	//	return 7;
-
-	//return 0;
+	// Didn't used a switch because it don't have a condition case
+	if (GroupNb == 0)
+		return -8;
+	else if (GroupNb == 1)
+		return -5;
+	else if (GroupNb == 2)
+		return -2;
+	else if (GroupNb == 3)
+		return 1;
+	else if (GroupNb == 4)
+		return 4;
+	else if (GroupNb >= 5)
+		return 7;
 
 	return 0;
 }
@@ -264,7 +258,7 @@ int32 UMEG_CentralPerks::GetScore(const TArray<AMEG_GridCell*>& GridCells, AMEG_
 			bool isParkCell = false;
 			bool isInCity = true;
 
-			// Check if it is the cell is a Parc district
+			// Check if the cell is a Parc district
 			if (_GridCell->GetDistrictType() != EMEGDistrict::Parc)
 				return false;
 
@@ -308,6 +302,10 @@ int32 UMEG_CentralPerks::GetScore(const TArray<AMEG_GridCell*>& GridCells, AMEG_
 	Score += InCityParcCells.Num();
 	Score -= OutCityParcCells.Num() * 2;
 
-	//return Score;
-	return 0;
+	return Score;
+}
+
+int32 UMEG_TheStrip::GetScore(const TArray<AMEG_GridCell*>& GridCells, AMEG_GM* GameMode) const
+{
+	return int32();
 }

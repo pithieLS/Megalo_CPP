@@ -120,13 +120,23 @@ void AMEG_GM::UpdateBoardLimits()
 void AMEG_GM::UpdateScore()
 {
 	Score = 0;
+	RoadScore = 0;
+	ClustersScore = 0;
+	FirstCardScore = 0;
+	SecondCardScore = 0;
+	ThirdCardScore = 0;
+
 	AMEG_GM* GameMode = Cast<AMEG_GM>(UGameplayStatics::GetGameMode(this));
 
 	for (EMEGDistrict District : TEnumRange<EMEGDistrict>())
 	{
-		Score += GridManager->GetBiggestDistrictClusterSize(District);
+		const int32 _CurrentClusterScore = GridManager->GetBiggestDistrictClusterSize(District);
+
+		ClustersScore += _CurrentClusterScore;
+		Score += _CurrentClusterScore;
 	}
- 	Score -= GridManager->GetRoadCount();
+	RoadScore = GridManager->GetRoadCount();
+	Score -= RoadScore;
 
 	for (int32 index = 0; index < ScoringCardsID.Num(); index++)
 	{
@@ -138,9 +148,27 @@ void AMEG_GM::UpdateScore()
 		if (!ensure(ScoringStrategyCDO != nullptr))
 			continue;
 
-		Score += ScoringStrategyCDO->GetScore(GridManager->GetGridCells(), GameMode);
+		switch (index)
+		{
+		case 0:
+			FirstCardScore = ScoringStrategyCDO->GetScore(GridManager->GetGridCells(), GameMode);
+			break;
+		case 1:
+			SecondCardScore = ScoringStrategyCDO->GetScore(GridManager->GetGridCells(), GameMode);
+			break;
+		case 2:
+			ThirdCardScore = ScoringStrategyCDO->GetScore(GridManager->GetGridCells(), GameMode);
+			break;
+		default:
+			break;
+		}
+
 	}
+
+	Score += FirstCardScore + SecondCardScore + ThirdCardScore;
+
 	UpdateBoardLimits();
+	GameMode->OnScoreUpdatedDelegate.Broadcast();
 }
 
 int32 AMEG_GM::GetPointGoal() const

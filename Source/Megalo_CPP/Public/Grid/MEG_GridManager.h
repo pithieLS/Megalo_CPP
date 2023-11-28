@@ -31,20 +31,24 @@ public:
 	int32 GetBiggestDistrictClusterSize(const EMEGDistrict DistrictType) const;
 	int32 GetDistrictClusterSize(const AMEG_GridCell* GridCell, const EMEGDistrict DistrictType, TArray<FVector2D>& VisitedCoords) const;
 	int32 GetRoadCount() const;
-	TArray<class AMEG_GridCell*> GetGridCells() const;
+	TArray<AMEG_GridCell*> GetGridCells() const;
+	TArray<AMEG_GridCell*> GetAllCellsFromAxis(int32 AxisValue); // 0 = Row, 1 = Column
 	AMEG_GridCell* GetCellFromCoords(FVector2D _OffsetCoords) const;
 	AMEG_CardPlacer* GetCardPlacerFromCoords(FVector2D _Coords) const;
 	void RotateCard();
+	TPair<enum EMEGCellPosition, struct FMEG_CellData> InvertCellData(TPair<EMEGCellPosition, FMEG_CellData> _CellData) const;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	const FVector2D GetCellPositionOffset(EMEGCellPosition _CellPosition) const;
 	void UpdateCardPlacers(FVector2D _Coords);
 	void VisitSingleRoad(const AMEG_GridCell* InGridCell, TArray<FVector2D>& VisitedCoords) const;
 	const FVector2D GetRoadNeighborOffset(const EMEGRoad& Road) const;
 	const EMEGRoad GetOppositeRoad(const EMEGRoad InitialDirection) const;
+
 
 	bool IsCardRotated = false;
 

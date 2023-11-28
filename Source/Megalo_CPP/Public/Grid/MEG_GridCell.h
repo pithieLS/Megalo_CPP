@@ -9,6 +9,7 @@
 
 class UWidgetComponent;
 class UMEG_CellWidget;
+class UStaticMesh;
 struct FMEG_CardData;
 
 UCLASS()
@@ -30,11 +31,29 @@ public:
 
 
 protected:
+	void SpawnMeshes();
+
 	UPROPERTY(EditAnywhere)
 	USceneComponent* SceneComponent;
 
+	UPROPERTY(VisibleAnywhere)
+	UBoxCollision* UL_RoadZone
+
 	UPROPERTY(EditAnywhere)
 	UWidgetComponent* CellWidget;
+
+	UPROPERTY(EditAnywhere, Category = "DistrictMeshes")
+	TArray<UStaticMesh*> ParcSM;
+
+	UPROPERTY(EditAnywhere, Category = "DistrictMeshes")
+	TArray<UStaticMesh*> CommercialSM;
+
+	UPROPERTY(EditAnywhere, Category = "DistrictMeshes")
+	TArray<UStaticMesh*> IndustrySM;
+
+	UPROPERTY(EditAnywhere, Category = "DistrictMeshes")
+	TArray<UStaticMesh*> DwellingsSM;
+
 public:	
 
 };

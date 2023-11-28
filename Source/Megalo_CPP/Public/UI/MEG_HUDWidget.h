@@ -17,4 +17,9 @@ class MEGALO_CPP_API UMEG_HUDWidget : public UUserWidget
 public:
 	UPROPERTY(meta = (BindWidget))
 	class UMEG_CardHand* WBP_Hand;
+
+protected:
+
+	UPROPERTY(meta = (BindWidget))
+	class UMEG_GeneralScore* WBP_GeneralScore;
 };

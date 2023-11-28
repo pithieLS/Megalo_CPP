@@ -65,3 +65,10 @@ const UMEG_CellWidget* AMEG_GridCell::GetCellWidget() const
 
 	return CastCellWidget;
 }
+
+void AMEG_GridCell::SpawnMeshes()
+{
+	const TArray
+}
+
+//	Mesh->SetStaticMesh(StaticMeshes[FMath::FRand()*StaticMeshes.Num()];
