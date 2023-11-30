@@ -6,7 +6,7 @@
 #include "Components/SceneComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Camera/CameraComponent.h"
-#include "Grid//MEG_GridManager.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/FloatingPawnMovement.h"
 #include "MEG_GM.h"
 
@@ -19,10 +19,15 @@ AMEG_Pawn::AMEG_Pawn()
 	SceneComponent = CreateDefaultSubobject<USceneComponent>("SceneComponent");
 	RootComponent = SceneComponent;
 
+	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>("SpringArmComponent");
+	if (!ensure(SpringArmComponent != nullptr))
+		return;
+	SpringArmComponent->SetupAttachment(RootComponent);
+
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
 	if (!ensure(CameraComponent != nullptr))
 		return;
-	CameraComponent->SetupAttachment(RootComponent);
+	CameraComponent->SetupAttachment(SpringArmComponent);
 
 	MovementComponent = CreateDefaultSubobject<UFloatingPawnMovement>("MovementComponent");
 	if (!ensure(MovementComponent != nullptr))
@@ -76,13 +81,15 @@ void AMEG_Pawn::MoveRight(float MovementDelta)
 void AMEG_Pawn::MoveUp(float MovementDelta)
 {
 	// ScrollSpeed is proportional to the height of the camera
-	const float ScrollSpeed = GetActorLocation().Z * 0.1f;
+	const float ScrollSpeed = SpringArmComponent->TargetArmLength * 0.1f;
 
-	float NewLocationZ = GetActorLocation().Z + ScrollSpeed * MovementDelta;
+	float NewLenght = SpringArmComponent->TargetArmLength + ScrollSpeed * MovementDelta;
 
-	NewLocationZ = FMath::Clamp(NewLocationZ, MinHeight, MaxHeight);
+	NewLenght = FMath::Clamp(NewLenght, MinLenght, MaxLenght);
+	const float NewRotationY = FMath::GetMappedRangeValueClamped(FVector2D(MinLenght, MaxLenght), FVector2D(MinRotation, MaxRotation), NewLenght);
 
-	SetActorLocation(FVector(GetActorLocation().X, GetActorLocation().Y, NewLocationZ));
+	SpringArmComponent->TargetArmLength = NewLenght;
+	SpringArmComponent->SetRelativeRotation(FRotator(NewRotationY, 0, 0));
 
 }
 

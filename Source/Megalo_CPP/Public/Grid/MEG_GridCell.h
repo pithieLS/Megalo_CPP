@@ -10,6 +10,7 @@
 class UWidgetComponent;
 class UMEG_CellWidget;
 class UStaticMesh;
+class UBoxComponent;
 struct FMEG_CardData;
 
 UCLASS()
@@ -20,6 +21,8 @@ class MEGALO_CPP_API AMEG_GridCell : public AActor
 public:	
 	// Sets default values for this actor's properties
 	AMEG_GridCell();
+	virtual void BeginPlay() override;
+
 	void UpdateCellWidget(EMEGDistrict DistrictType, TArray<EMEGRoad> _Roads);
 	EMEGDistrict GetDistrictType() const;
 	TArray<EMEGRoad> GetRoads() const;
@@ -33,11 +36,38 @@ public:
 protected:
 	void SpawnMeshes();
 
+	TArray<UStaticMeshComponent*> SpawnedMeshes;
+	
+	TArray<int32> SpawnRoatations = { 0, 90, 180, 270 };
+
 	UPROPERTY(EditAnywhere)
 	USceneComponent* SceneComponent;
 
 	UPROPERTY(VisibleAnywhere)
-	UBoxCollision* UL_RoadZone
+	UBoxComponent* U_RoadZone;
+
+	UPROPERTY(VisibleAnywhere)
+	UBoxComponent* D_RoadZone;
+
+	UPROPERTY(VisibleAnywhere)
+	UBoxComponent* L_RoadZone;
+
+	UPROPERTY(VisibleAnywhere)
+	UBoxComponent* R_RoadZone;
+	
+	UPROPERTY(VisibleAnywhere)
+	UBoxComponent* UL_SpawnZone;
+
+	UPROPERTY(VisibleAnywhere)
+	UBoxComponent* UR_SpawnZone;
+
+	UPROPERTY(VisibleAnywhere)
+	UBoxComponent* DL_SpawnZone;
+
+	UPROPERTY(VisibleAnywhere)
+	UBoxComponent* DR_SpawnZone;
+
+	TArray<UBoxComponent*> SpawnZones;
 
 	UPROPERTY(EditAnywhere)
 	UWidgetComponent* CellWidget;
