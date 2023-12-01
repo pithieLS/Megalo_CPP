@@ -130,7 +130,7 @@ void AMEG_GridCell::SpawnMeshes()
 	{
 		DistrictMeshes = CommercialSM;
 		SpawnNb = 6;
-		RandScaleRange = FVector2D(0.005, 0.005);
+		RandScaleRange = FVector2D(0.007, 0.012);
 	}
 	else if (DistrictType == EMEGDistrict::Industry)
 	{
@@ -176,6 +176,8 @@ void AMEG_GridCell::SpawnMeshes()
 		NewMeshComponent->SetStaticMesh(DistrictMeshes[FMath::RandRange(0, DistrictMeshes.Num() - 1)]);
 		NewMeshComponent->SetRelativeRotation(FRotator(0, RandRotation, 0));
 		NewMeshComponent->RegisterComponent();
+		NewMeshComponent->SetRenderCustomDepth(true);
+		NewMeshComponent->SetCustomDepthStencilValue(1);
 		SpawnedMeshes.Add(NewMeshComponent);
 	}
 }

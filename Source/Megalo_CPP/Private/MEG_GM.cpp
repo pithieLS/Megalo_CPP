@@ -56,6 +56,7 @@ void AMEG_GM::PlaceCardFromHand(int32 InCardId, FVector2D InCoords)
 	RemoveCardFromHand(InCardId);
 	DrawCard();
 	UpdateScore();
+	OnCardPlaced.ExecuteIfBound();
 }
 
 AMEG_GridManager* AMEG_GM::GetGridManager()

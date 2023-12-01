@@ -56,6 +56,9 @@ public:
 	DECLARE_DELEGATE(FOnCardHandUpdated)
 	FOnCardHandUpdated OnCardHandUpdatedDelegate;
 
+	DECLARE_DELEGATE(FOnCardPlaced)
+	FOnCardPlaced OnCardPlaced;
+
 	DECLARE_DELEGATE(FOnRotatePressed)
 	FOnRotatePressed OnRotatePressedDelegate;
 

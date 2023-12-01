@@ -6,6 +6,9 @@
 #include "GameFramework/Actor.h"
 #include "MEG_CardPlacer.generated.h"
 
+class UNiagaraSystem;
+class UNiagaraComponent;
+
 UCLASS()
 class MEGALO_CPP_API AMEG_CardPlacer : public AActor
 {
@@ -17,6 +20,8 @@ public:
 
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+	void OnCardPlaced();
 
 	UFUNCTION()
 	void OnMeshClicked(UPrimitiveComponent* Component, FKey ButtonPressed);
@@ -30,4 +35,7 @@ protected :
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UStaticMeshComponent* MeshComponent;
+
+	UPROPERTY(EditAnywhere)
+	UNiagaraSystem* PoofFX;
 };

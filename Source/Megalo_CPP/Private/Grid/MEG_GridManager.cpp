@@ -103,6 +103,10 @@ void AMEG_GridManager::PlaceCard(int32 _CardID, FVector2D _CardCoords)
 	if (!ensure(CardData))
 		return;
 
+	AMEG_CardPlacer* CurrentPlacer = GetCardPlacerFromCoords(_CardCoords);
+	if (CurrentPlacer != nullptr)
+		CurrentPlacer->OnCardPlaced();
+
 	for (const TPair<EMEGCellPosition, FMEG_CellData>& _CellData : CardData->Cells)
 	{
 		TPair<EMEGCellPosition, FMEG_CellData> NewCellData;
