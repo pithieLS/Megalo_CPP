@@ -57,12 +57,8 @@ void AMEG_GridCell::UpdateCellWidget(EMEGDistrict DistrictType, TArray<EMEGRoad>
 		CastCellWidget->UpdateCell(DistrictType, _Roads);
 		Roads = _Roads;
 	}
-	for (UStaticMeshComponent* _SpawnedMesh : SpawnedMeshes)
-	{
-		_SpawnedMesh->DestroyComponent();
-		SpawnedMeshes.Remove(_SpawnedMesh);
-	}
-	SpawnMeshes();
+
+	//SpawnMeshes();
 }
 
 EMEGDistrict AMEG_GridCell::GetDistrictType() const
@@ -109,6 +105,7 @@ const UMEG_CellWidget* AMEG_GridCell::GetCellWidget() const
 
 void AMEG_GridCell::SpawnMeshes()
 {
+	// Destroy previous spawned meshes and empty the array
 	for (UStaticMeshComponent* _SpawnedMesh : SpawnedMeshes)
 		_SpawnedMesh->DestroyComponent();
 	SpawnedMeshes.Empty();
@@ -145,6 +142,7 @@ void AMEG_GridCell::SpawnMeshes()
 		RandScaleRange = FVector2D(0.01, 0.015);
 	}
 
+	// Remove spawn zones that are on existing road so nothing spawn on them
 	TArray<UBoxComponent*> ValidSpawnZones = SpawnZones;
 	TArray<EMEGRoad> _Roads = GetRoads();
 	for (EMEGRoad _Road : _Roads)
@@ -159,6 +157,7 @@ void AMEG_GridCell::SpawnMeshes()
 			ValidSpawnZones.Remove(R_RoadZone);
 	}
 
+	// Spawn a certain number of meshes at random locations in valid spawn zones
 	for (int32 Index = 0; Index < SpawnNb; Index++)
 	{
 		UStaticMeshComponent* NewMeshComponent = NewObject<UStaticMeshComponent>(this, UStaticMeshComponent::StaticClass(), NAME_None);
@@ -179,5 +178,11 @@ void AMEG_GridCell::SpawnMeshes()
 		NewMeshComponent->SetRenderCustomDepth(true);
 		NewMeshComponent->SetCustomDepthStencilValue(1);
 		SpawnedMeshes.Add(NewMeshComponent);
+
+		// Remove current spawn zone from the valid spawn zones if the district is not a parc (1 building per spawn zone);
+		if (DistrictType == EMEGDistrict::Parc)
+			continue;
+
+		ValidSpawnZones.Remove(RandSpawnZone);
 	}
 }

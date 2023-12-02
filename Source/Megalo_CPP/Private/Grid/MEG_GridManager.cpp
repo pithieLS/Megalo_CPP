@@ -359,8 +359,8 @@ TArray<class AMEG_GridCell*> AMEG_GridManager::GetGridCells() const
 TArray<AMEG_GridCell*> AMEG_GridManager::GetAllCellsFromAxis(int32 AxisValue)
 {
 	AMEG_GM* GameMode = Cast<AMEG_GM>(UGameplayStatics::GetGameMode(this));
-	//if (!ensure(GameMode != nullptr))
-	//	return;
+	if (!ensure(GameMode != nullptr))
+		return{};
 
 
 	const TArray<AMEG_GridCell*> AxisCells = GetGridCells().FilterByPredicate([this, AxisValue](const AMEG_GridCell* _AxisCell)
