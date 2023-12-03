@@ -32,6 +32,23 @@ public:
 	FVector2D CellCoords;
 	TArray<EMEGRoad> Roads;
 
+	
+	// Spline road related
+	UPROPERTY(EditAnywhere, Category = "SplinePoints")
+	USceneComponent* SplinePointMiddle;
+
+	UPROPERTY(EditAnywhere, Category = "SplinePoints")
+	USceneComponent* SplinePointUp;
+
+	UPROPERTY(EditAnywhere, Category = "SplinePoints")
+	USceneComponent* SplinePointDown;
+
+	UPROPERTY(EditAnywhere, Category = "SplinePoints")
+	USceneComponent* SplinePointLeft;
+
+	UPROPERTY(EditAnywhere, Category = "SplinePoints")
+	USceneComponent* SplinePointRight;
+
 
 protected:
 	void SpawnMeshes();

@@ -17,6 +17,9 @@ AMEG_CardPlacer::AMEG_CardPlacer()
 
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>("MeshComponent");
 	MeshComponent->SetupAttachment(RootComponent);
+
+	MeshComponent->SetRenderCustomDepth(true);
+	MeshComponent->SetCustomDepthStencilValue(1);
 }
 
 void AMEG_CardPlacer::BeginPlay()

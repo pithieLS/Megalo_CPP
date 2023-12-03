@@ -11,6 +11,7 @@ enum class EMEGDistrict;
 enum class EMEGRoad:uint8;
 class AMEG_GridCell;
 class AMEG_CardPlacer;
+class AMEG_RoadSpline;
 
 UCLASS()
 class MEGALO_CPP_API AMEG_GridManager : public AActor
@@ -30,11 +31,13 @@ public:
 	void PlaceCard(int32 _CardID, FVector2D _CardCoords);
 	int32 GetBiggestDistrictClusterSize(const EMEGDistrict DistrictType) const;
 	int32 GetDistrictClusterSize(const AMEG_GridCell* GridCell, const EMEGDistrict DistrictType, TArray<FVector2D>& VisitedCoords) const;
-	int32 GetRoadCount() const;
+	int32 GetRoadCount();
 	TArray<AMEG_GridCell*> GetGridCells() const;
 	TArray<AMEG_GridCell*> GetAllCellsFromAxis(int32 AxisValue); // 0 = Row, 1 = Column
 	AMEG_GridCell* GetCellFromCoords(FVector2D _OffsetCoords) const;
+	const FVector2D GetRoadNeighborOffset(const EMEGRoad& Road) const;
 	AMEG_CardPlacer* GetCardPlacerFromCoords(FVector2D _Coords) const;
+	const EMEGRoad GetOppositeRoad(const EMEGRoad InitialDirection) const;
 	void RotateCard();
 	TPair<enum EMEGCellPosition, struct FMEG_CellData> InvertCellData(TPair<EMEGCellPosition, FMEG_CellData> _CellData) const;
 
@@ -45,21 +48,22 @@ protected:
 
 	const FVector2D GetCellPositionOffset(EMEGCellPosition _CellPosition) const;
 	void UpdateCardPlacers(FVector2D _Coords);
-	void VisitSingleRoad(const AMEG_GridCell* InGridCell, TArray<FVector2D>& VisitedCoords) const;
-	const FVector2D GetRoadNeighborOffset(const EMEGRoad& Road) const;
-	const EMEGRoad GetOppositeRoad(const EMEGRoad InitialDirection) const;
-
-
-	bool IsCardRotated = false;
+	void VisitSingleRoad(AMEG_GridCell* InGridCell, TArray<FVector2D>& VisitedCoords);
 
 	TArray<class AMEG_GridCell*> GridCells;
 	TArray<AMEG_CardPlacer*> CardPlacers;
 	TArray<FVector2D> NeighborsOffset = { FVector2D(-1,0), FVector2D(1,0),FVector2D(0,-1), FVector2D(0,1) };
+	TArray<class USplineComponent*> RoadSplines;
+
+	// Spline related
+	AMEG_RoadSpline* NewSpline;
+	TArray<AMEG_RoadSpline*> SplinesArray;
 
 	// Card Preview Related
 	TArray<AMEG_GridCell*> OverridenGridCells;
 	TArray<AMEG_GridCell*> GridCellPreviews;
 	FVector2D PreviewCardCoords;
+	bool IsCardRotated = false;
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<AMEG_CardPlacer> CardPlacerClassBP;
@@ -67,8 +71,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class AMEG_GridCell> GridCellClassBP;
 
-
-
-public:	
-
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AMEG_RoadSpline> RoadSplineClassBP;
 };

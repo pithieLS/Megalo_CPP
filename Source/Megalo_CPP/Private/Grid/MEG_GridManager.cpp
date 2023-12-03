@@ -4,7 +4,9 @@
 #include "Grid/MEG_GridManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "Blueprint/WidgetTree.h"
+#include "Components/SplineComponent.h"
 #include "MEG_GM.h"
+#include "MEG_RoadSpline.h"
 #include "Data/MEG_CardData.h"
 #include "Grid/MEG_GridCell.h"
 #include "Grid/MEG_CardPlacer.h"
@@ -326,12 +328,12 @@ AMEG_GridCell* AMEG_GridManager::GetCellFromCoords(FVector2D _OffsetCoords) cons
 	return *_GridCell;
 }
 
-int32 AMEG_GridManager::GetRoadCount() const
+int32 AMEG_GridManager::GetRoadCount()
 {
 	TArray<FVector2D> VisitedCoords;
 	int32 NumRoads = 0;
 
-	for (const AMEG_GridCell* _GridCell : GridCells)
+	for (AMEG_GridCell* _GridCell : GridCells)
 	{
 		if (!ensure(_GridCell != nullptr))
 			continue;
@@ -343,10 +345,17 @@ int32 AMEG_GridManager::GetRoadCount() const
 		if (VisitedCoords.Contains(_GridCell->CellCoords))
 			continue;
 
+		//// Create spline for this road
+		//NewSpline = GetWorld()->SpawnActor<AMEG_RoadSpline>(RoadSplineClassBP);
+		//if (!ensure(NewSpline != nullptr))
+		//	return 0;
+		//SplinesArray.Add(NewSpline);
+
 		NumRoads++;
 
-		// No need to know the length of the road, we just want to mark this entire road as visited
-		VisitSingleRoad(_GridCell, VisitedCoords);
+		//// No need to know the length of the road, we just want to mark this entire road as visited
+		//VisitSingleRoad(_GridCell, VisitedCoords);
+		//NewSpline->MakeRoad(_GridCell, this);
 	}
 	return NumRoads;
 }
@@ -380,7 +389,7 @@ TArray<AMEG_GridCell*> AMEG_GridManager::GetAllCellsFromAxis(int32 AxisValue)
 	return AxisCells;
 }
 
-void AMEG_GridManager::VisitSingleRoad(const AMEG_GridCell* _GridCell, TArray<FVector2D>& VisitedCoords) const
+void AMEG_GridManager::VisitSingleRoad(AMEG_GridCell* _GridCell, TArray<FVector2D>& VisitedCoords)
 {
 	if (_GridCell->GetRoads().Num() == 0)
 		return; // No roads
@@ -394,10 +403,13 @@ void AMEG_GridManager::VisitSingleRoad(const AMEG_GridCell* _GridCell, TArray<FV
 	for (const EMEGRoad Road : _GridCell->GetRoads())
 	{
 		const FVector2D Offset = GetRoadNeighborOffset(Road);
-		const AMEG_GridCell* NeighBorCell = GetCellFromCoords(_GridCell->CellCoords + Offset);
+		AMEG_GridCell* NeighBorCell = GetCellFromCoords(_GridCell->CellCoords + Offset);
 
-		if (NeighBorCell == nullptr) // There are no cell at this coord
+		if (NeighBorCell == nullptr) // There are no cell at this coord and is an end of the road
+		{
+			//NewSpline->isLoop = false; // If a road lead to the end, the road isn't a loop
 			continue;
+		}
 
 		if (!NeighBorCell->GetRoads().Contains(GetOppositeRoad(Road)))
 			continue;
@@ -417,7 +429,7 @@ const FVector2D AMEG_GridManager::GetRoadNeighborOffset(const EMEGRoad& Road) co
 	case EMEGRoad::Left:
 		return FVector2D(-1, 0);
 	case EMEGRoad::Right:
-		return FVector2D(0, 1);
+		return FVector2D(1, 0);
 	default:
 		return FVector2D(0, 0);
 	}

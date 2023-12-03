@@ -21,6 +21,17 @@ AMEG_GridCell::AMEG_GridCell()
 	CellWidget = CreateDefaultSubobject<UWidgetComponent>("CellWidget");
 	CellWidget->SetupAttachment(RootComponent);
 
+	SplinePointMiddle = CreateDefaultSubobject<USceneComponent>("SplinePointMiddle");
+	SplinePointMiddle->SetupAttachment(RootComponent);
+	SplinePointUp = CreateDefaultSubobject<USceneComponent>("SplinePointUp");
+	SplinePointUp->SetupAttachment(RootComponent);
+	SplinePointDown = CreateDefaultSubobject<USceneComponent>("SplinePointDown");
+	SplinePointDown->SetupAttachment(RootComponent);
+	SplinePointLeft = CreateDefaultSubobject<USceneComponent>("SplinePointLeft");
+	SplinePointLeft->SetupAttachment(RootComponent);
+	SplinePointRight = CreateDefaultSubobject<USceneComponent>("SplinePointRight");
+	SplinePointRight->SetupAttachment(RootComponent);
+
 	U_RoadZone = CreateDefaultSubobject<UBoxComponent>(TEXT("U_RoadZone"));
 	U_RoadZone->SetupAttachment(RootComponent);
 	D_RoadZone = CreateDefaultSubobject<UBoxComponent>(TEXT("D_RoadZone"));
@@ -58,7 +69,7 @@ void AMEG_GridCell::UpdateCellWidget(EMEGDistrict DistrictType, TArray<EMEGRoad>
 		Roads = _Roads;
 	}
 
-	//SpawnMeshes();
+	SpawnMeshes();
 }
 
 EMEGDistrict AMEG_GridCell::GetDistrictType() const
@@ -114,32 +125,32 @@ void AMEG_GridCell::SpawnMeshes()
 
 	TArray<UStaticMesh*> DistrictMeshes;
 	int32 SpawnNb;
-	FVector2D RandScaleRange;
+	FVector2D RandWidthRange;
 
 	// Get a ref to the correct SM array
 	if (DistrictType == EMEGDistrict::Parc)
 	{
 		DistrictMeshes = ParcSM;
 		SpawnNb = 15;
-		RandScaleRange = FVector2D(0.02, 0.03);
+		RandWidthRange = FVector2D(10, 12);
 	}
 	else if (DistrictType == EMEGDistrict::Commercial)
 	{
 		DistrictMeshes = CommercialSM;
 		SpawnNb = 6;
-		RandScaleRange = FVector2D(0.007, 0.012);
+		RandWidthRange = FVector2D(10, 13);
 	}
 	else if (DistrictType == EMEGDistrict::Industry)
 	{
 		DistrictMeshes = IndustrySM;
-		SpawnNb = 5;
-		RandScaleRange = FVector2D(0.01, 0.015);
+		SpawnNb = 6;
+		RandWidthRange = FVector2D(10, 15);
 	}
 	else if (DistrictType == EMEGDistrict::Dwellings)
 	{
 		DistrictMeshes = DwellingsSM;
 		SpawnNb = 6;
-		RandScaleRange = FVector2D(0.01, 0.015);
+		RandWidthRange = FVector2D(10, 15);
 	}
 
 	// Remove spawn zones that are on existing road so nothing spawn on them
@@ -161,18 +172,23 @@ void AMEG_GridCell::SpawnMeshes()
 	for (int32 Index = 0; Index < SpawnNb; Index++)
 	{
 		UStaticMeshComponent* NewMeshComponent = NewObject<UStaticMeshComponent>(this, UStaticMeshComponent::StaticClass(), NAME_None);
+		UStaticMesh* RandMesh = DistrictMeshes[FMath::RandRange(0, DistrictMeshes.Num() - 1)];
 
 		const int32 RandIndexZone = FMath::RandRange(0, ValidSpawnZones.Num() - 1);
 		UBoxComponent* RandSpawnZone = ValidSpawnZones[RandIndexZone];
 		const FVector RandSpawnLocation = FMath::RandPointInBox(RandSpawnZone->GetLocalBounds().GetBox());
-		const float RandScale = FMath::RandRange(RandScaleRange.X, RandScaleRange.Y);
+
+		const float RandWidth = FMath::RandRange(RandWidthRange.X, RandWidthRange.Y);
+		const float MeshWidth = RandMesh->GetBoundingBox().GetExtent().X * 2;
+		const float RandMeshScale = RandWidth / MeshWidth;
+
 		const int32 RandIndexRot = FMath::RandRange(0, SpawnRoatations.Num() - 1);
 		const float RandRotation = SpawnRoatations[RandIndexRot];
 		
 		NewMeshComponent->AttachToComponent(RandSpawnZone, FAttachmentTransformRules::KeepRelativeTransform);
 		NewMeshComponent->SetRelativeLocation(RandSpawnLocation);
-		NewMeshComponent->SetRelativeScale3D(FVector(RandScale, RandScale, RandScale));
-		NewMeshComponent->SetStaticMesh(DistrictMeshes[FMath::RandRange(0, DistrictMeshes.Num() - 1)]);
+		NewMeshComponent->SetRelativeScale3D(FVector(RandMeshScale, RandMeshScale, RandMeshScale));
+		NewMeshComponent->SetStaticMesh(RandMesh);
 		NewMeshComponent->SetRelativeRotation(FRotator(0, RandRotation, 0));
 		NewMeshComponent->RegisterComponent();
 		NewMeshComponent->SetRenderCustomDepth(true);
