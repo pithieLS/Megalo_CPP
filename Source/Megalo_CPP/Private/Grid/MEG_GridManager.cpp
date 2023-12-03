@@ -239,6 +239,7 @@ void AMEG_GridManager::BeginPlay()
 		return;
 
 	GameMode->OnRotatePressedDelegate.BindUObject(this, &AMEG_GridManager::RotateCard);
+	GameMode->OnCardPlacedDelegate.AddUObject(this, &AMEG_GridManager::OnCardPlaced);
 }
 
 void AMEG_GridManager::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -250,6 +251,7 @@ void AMEG_GridManager::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		return;
 
 	GameMode->OnRotatePressedDelegate.Unbind();
+	GameMode->OnCardPlacedDelegate.RemoveAll(this);
 }
 
 const FVector2D AMEG_GridManager::GetCellPositionOffset(EMEGCellPosition _CellPosition) const
@@ -345,17 +347,17 @@ int32 AMEG_GridManager::GetRoadCount()
 		if (VisitedCoords.Contains(_GridCell->CellCoords))
 			continue;
 
-		//// Create spline for this road
-		//NewSpline = GetWorld()->SpawnActor<AMEG_RoadSpline>(RoadSplineClassBP);
-		//if (!ensure(NewSpline != nullptr))
-		//	return 0;
-		//SplinesArray.Add(NewSpline);
+		// Create spline for this road
+		NewSpline = GetWorld()->SpawnActor<AMEG_RoadSpline>(RoadSplineClassBP);
+		if (!ensure(NewSpline != nullptr))
+			return 0;
+		SplinesArray.Add(NewSpline);
 
 		NumRoads++;
 
-		//// No need to know the length of the road, we just want to mark this entire road as visited
-		//VisitSingleRoad(_GridCell, VisitedCoords);
-		//NewSpline->MakeRoad(_GridCell, this);
+		// No need to know the length of the road, we just want to mark this entire road as visited
+		VisitSingleRoad(_GridCell, VisitedCoords);
+		NewSpline->MakeRoad(_GridCell, this);
 	}
 	return NumRoads;
 }
@@ -407,7 +409,7 @@ void AMEG_GridManager::VisitSingleRoad(AMEG_GridCell* _GridCell, TArray<FVector2
 
 		if (NeighBorCell == nullptr) // There are no cell at this coord and is an end of the road
 		{
-			//NewSpline->isLoop = false; // If a road lead to the end, the road isn't a loop
+			NewSpline->isLoop = false; // If a road lead to the end, the road isn't a loop
 			continue;
 		}
 
@@ -416,6 +418,15 @@ void AMEG_GridManager::VisitSingleRoad(AMEG_GridCell* _GridCell, TArray<FVector2
 
 		VisitSingleRoad(NeighBorCell, VisitedCoords);
 	}
+}
+
+void AMEG_GridManager::OnCardPlaced()
+{
+	for (int32 Index = 0; Index < SplinesArray.Num(); Index++)
+	{
+		SplinesArray[Index]->Destroy();
+	}
+	SplinesArray.Empty();
 }
 
 const FVector2D AMEG_GridManager::GetRoadNeighborOffset(const EMEGRoad& Road) const

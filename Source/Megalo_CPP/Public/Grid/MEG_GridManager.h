@@ -49,6 +49,7 @@ protected:
 	const FVector2D GetCellPositionOffset(EMEGCellPosition _CellPosition) const;
 	void UpdateCardPlacers(FVector2D _Coords);
 	void VisitSingleRoad(AMEG_GridCell* InGridCell, TArray<FVector2D>& VisitedCoords);
+	void OnCardPlaced();
 
 	TArray<class AMEG_GridCell*> GridCells;
 	TArray<AMEG_CardPlacer*> CardPlacers;

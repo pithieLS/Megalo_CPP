@@ -51,12 +51,12 @@ void AMEG_GM::PlaceCardFromHand(int32 InCardId, FVector2D InCoords)
 {
 	if (InCardId == INDEX_NONE)
 		return;
+	OnCardPlacedDelegate.Broadcast();
 	GridManager->PlaceCard(InCardId, InCoords);
 	PlayedCardsID.Add(InCardId);
 	RemoveCardFromHand(InCardId);
 	DrawCard();
 	UpdateScore();
-	OnCardPlaced.ExecuteIfBound();
 }
 
 AMEG_GridManager* AMEG_GM::GetGridManager()
