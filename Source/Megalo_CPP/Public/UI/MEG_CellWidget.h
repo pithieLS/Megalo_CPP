@@ -45,4 +45,7 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	USizeBox* LeftBox;
 
+	UPROPERTY(meta = (BindWidget))
+	USizeBox* MiddleBox;
+
 };

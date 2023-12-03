@@ -40,6 +40,10 @@ void UMEG_CellWidget::UpdateDistrict(EMEGDistrict _DistrictType)
 void UMEG_CellWidget::UpdateRoads(TArray<EMEGRoad> _Roads)
 {
 	Roads = _Roads;
+	if (_Roads.Num() > 0)
+		MiddleBox->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+	else
+		MiddleBox->SetVisibility(ESlateVisibility::Collapsed);
 
 	if (Roads.Contains(EMEGRoad::Up))
 		UpBox->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
